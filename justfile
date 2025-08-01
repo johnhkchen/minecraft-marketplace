@@ -40,8 +40,8 @@ dev:
     # Start development servers with hot reload (foreground)
     npm run dev
 
-# Start development environment with Nix orchestration
-nix-up:
+# Start development environment with Nix process-compose
+nix-dev:
     process-compose up
 
 # Run tests
@@ -165,38 +165,119 @@ db-restore backup_file:
 
 # === Docker Build Commands ===
 
-# Build production Docker image
+# Build production Docker image with validation
 build:
     #!/usr/bin/env bash
     set -euo pipefail
     
-    echo "🔨 Building production Docker image..."
-    docker build \
-        --tag {{ image_name }}:{{ image_tag }} \
-        --tag {{ image_name }}:$(date +%Y%m%d-%H%M%S) \
-        .
+    echo "🔍 Validating paths before build..."
+    just validate-paths
     
-    echo "✅ Docker image built successfully!"
-    echo "   Image: {{ image_name }}:{{ image_tag }}"
+    # Generate build tag with git hash and timestamp
+    BUILD_TAG="$(git rev-parse --short HEAD)-$(date +%s)"
+    echo "🏷️  Build tag: $BUILD_TAG"
+    
+    echo "🔨 Building production Docker services..."
+    BUILD_TAG=$BUILD_TAG docker compose -f config/docker/compose.yml build
+    
+    echo "✅ Docker services built successfully!"
+    echo "   Build tag: $BUILD_TAG"
 
-# Build with no cache (clean build)
+# Build with complete cache invalidation (nuclear option)
 build-clean:
     #!/usr/bin/env bash
     set -euo pipefail
     
-    echo "🔨 Building production Docker image (clean build)..."
-    docker build \
-        --no-cache \
-        --tag {{ image_name }}:{{ image_tag }} \
-        --tag {{ image_name }}:$(date +%Y%m%d-%H%M%S) \
-        .
+    echo "💥 CLEAN BUILD - Removing all Docker cache..."
+    echo "   This will take longer but ensures fresh build"
+    echo ""
     
-    echo "✅ Docker image built successfully!"
+    # Validate paths first
+    just validate-paths
+    
+    # Clean all Docker cache
+    docker system prune -f
+    docker builder prune -af
+    
+    # Generate build tag
+    BUILD_TAG="clean-$(git rev-parse --short HEAD)-$(date +%s)"  
+    echo "🏷️  Clean build tag: $BUILD_TAG"
+    
+    echo "🔨 Building with clean cache..."
+    BUILD_TAG=$BUILD_TAG docker compose -f config/docker/compose.yml build --no-cache --pull
+    
+    echo "✅ Clean build completed!"
+    echo "   Build tag: $BUILD_TAG"
+
+# Validate build artifacts match source files
+validate-build:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    echo "🔍 Validating build artifacts..."
+    
+    # Check if services are running
+    if ! docker compose -f config/docker/compose.yml ps --quiet | grep -q .; then
+        echo "❌ Services not running - start with 'just up' first"
+        exit 1
+    fi
+    
+    # Check frontend component hash in built artifact
+    BUILT_HASH=$(curl -s http://localhost:7410 2>/dev/null | grep -o "EnhancedHomepage\.[^\.]*\.js" | head -1 || echo "not-found")
+    SOURCE_MODIFIED=$(stat -c %Y workspaces/frontend/src/components/EnhancedHomepage.svelte)
+    
+    echo "   Built artifact: $BUILT_HASH"
+    echo "   Source modified: $(date -d @$SOURCE_MODIFIED)"
+    
+    if [[ "$BUILT_HASH" == "not-found" ]]; then
+        echo "❌ Build validation failed - component not found in deployment"
+        echo "💡 Try: just build-clean && just up"
+        exit 1
+    fi
+    
+    echo "✅ Build validation passed"
+
+# Validate all required paths exist before build
+validate-paths:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    echo "🔍 Validating file structure..."
+    
+    # Critical source files
+    REQUIRED_FILES=(
+        "workspaces/frontend/src/components/EnhancedHomepage.svelte"
+        "workspaces/frontend/src/pages/index.astro" 
+        "workspaces/frontend/package.json"
+        "workspaces/shared/package.json"
+        "workspaces/backend/package.json"
+        "config/docker/Dockerfile.frontend"
+        "config/docker/Dockerfile.backend"
+        "config/docker/compose.yml"
+        "config/docker/nginx.conf"
+    )
+    
+    MISSING_FILES=()
+    for file in "${REQUIRED_FILES[@]}"; do
+        if [[ ! -f "$file" ]]; then
+            MISSING_FILES+=("$file")
+        fi
+    done
+    
+    if [[ ${#MISSING_FILES[@]} -gt 0 ]]; then
+        echo "❌ Missing required files:"
+        printf '   • %s\n' "${MISSING_FILES[@]}"
+        echo ""
+        echo "💡 Ensure codebase reorganization is complete"
+        exit 1
+    fi
+    
+    echo "✅ All required paths validated"
 
 # === Docker Run Commands ===
 
-# PRODUCTION DEPLOYMENT: Start all services in production mode
-infra:
+# DEPLOY: Start all services in production mode (standard 'up' command)
+up:
     #!/usr/bin/env bash
     set -euo pipefail
     
@@ -233,70 +314,6 @@ infra:
     echo "   • just logs      - View application logs"
     echo "   • just down      - Stop all services"
 
-# DEVELOPMENT MODE: Start development servers with file watching
-up:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    
-    echo "🚀 Starting development environment with file watching..."
-    echo ""
-    echo "   ✅ OUTCOME: Development servers with hot reload"
-    echo "   📍 ACCESS: http://localhost:7410"
-    echo "   🔄 FEATURES: File changes auto-reload"
-    echo "   ⚠️  WARNING: For development only - use 'just infra' for production"
-    echo ""
-    
-    # Check if we should use development compose file
-    if [ -f "config/docker/compose.dev.yml" ]; then
-        echo "🐳 Starting development infrastructure..."
-        docker compose -f config/docker/compose.dev.yml up -d postgres valkey postgrest nginx
-        
-        # Wait for database to be ready
-        echo "⏳ Waiting for database to be ready..."
-        timeout=30
-        while ! docker compose -f config/docker/compose.dev.yml exec postgres pg_isready -U dev_user -d minecraft_marketplace_dev >/dev/null 2>&1; do
-            sleep 1
-            timeout=$((timeout - 1))
-            if [ $timeout -eq 0 ]; then
-                echo "❌ Database failed to start within 30 seconds"
-                exit 1
-            fi
-        done
-        
-        echo "🔥 Starting development servers..."
-        npm run dev
-    else
-        echo "⚠️  No config/docker/compose.dev.yml found - using production deployment"
-        just infra
-    fi
-
-# Run container in development mode (with live reloading)
-deploy-dev:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    
-    echo "🚀 Deploying in development mode..."
-    
-    # Stop existing container
-    docker stop {{ container_name }}-dev 2>/dev/null || true
-    docker rm {{ container_name }}-dev 2>/dev/null || true
-    
-    # Run development container with source mounting
-    docker run \
-        --name {{ container_name }}-dev \
-        --detach \
-        --restart unless-stopped \
-        --publish {{ port }}:4321 \
-        --volume "$(pwd):/app" \
-        --volume "$(pwd)/{{ data_volume }}:/app/data" \
-        --workdir /app \
-        --env NODE_ENV=development \
-        node:20-alpine \
-        sh -c "npm install && npm run dev"
-    
-    echo "✅ Development deployment started!"
-    echo "   URL: http://localhost:{{ port }}"
-
 # === Container Management ===
 
 # CHECK STATUS: Show current deployment status and access information
@@ -328,7 +345,7 @@ status:
     else
         echo "❌ DEPLOYMENT STATUS: No services running"
         echo ""
-        echo "🚀 TO START: just infra (production) or just up (development)"
+        echo "🚀 TO START: just up (production) or just dev (development)"
     fi
 
 # View recent logs (raw docker)
@@ -367,7 +384,7 @@ down:
     echo ""
     echo "   ✅ OUTCOME: All services will be stopped"
     echo "   💾 DATA: Database data is preserved"
-    echo "   🔄 TO RESTART: just infra (production) or just up (development)"
+    echo "   🔄 TO RESTART: just up (production) or just dev (development)"
     echo ""
     
     docker compose -f config/docker/compose.yml down
@@ -441,6 +458,32 @@ update: build up
 
 # === Health and Monitoring ===
 
+# PORTS: Quick reference for all service ports (designed to avoid conflicts)
+ports:
+    @echo "🌐 Minecraft Marketplace Service Ports"
+    @echo "======================================"
+    @echo ""
+    @echo "   ✅ OUTCOME: Port reference for all services"
+    @echo "   🎯 PURPOSE: Know which ports to use (uncommon range avoids conflicts)"
+    @echo "   💡 TIP: Bookmark these - different from typical 3000, 8000 ports"
+    @echo ""
+    @echo "🌍 MAIN ACCESS POINTS:"
+    @echo "   • http://localhost:7410 - Main entry (nginx reverse proxy)"
+    @echo "   • http://localhost:7410/docs - API documentation (PostgREST)"
+    @echo "   • http://localhost:7410/api/data - Database API (PostgREST)"
+    @echo ""
+    @echo "🔧 DEVELOPMENT PORTS (when using 'just dev'):"
+    @echo "   • http://localhost:4321 - Frontend dev server (Astro + Svelte)"
+    @echo "   • http://localhost:3001 - Backend dev server (Hono API)"
+    @echo "   • http://localhost:3000 - Database API (PostgREST direct)"
+    @echo "   • postgresql://localhost:5432 - Database (PostgreSQL)"
+    @echo "   • redis://localhost:6379 - Cache (Valkey/Redis)"
+    @echo ""
+    @echo "🎯 FOR NEWCOMERS:"
+    @echo "   • Always start with: http://localhost:7410 (production)"
+    @echo "   • Or for development: http://localhost:4321 (with hot reload)"
+    @echo "   • Range 7410-7419 chosen to avoid conflicts with other projects"
+
 # HEALTH CHECK: Comprehensive service health validation
 health:
     #!/usr/bin/env bash
@@ -455,7 +498,7 @@ health:
     # Check if services are running
     if ! docker compose -f config/docker/compose.yml ps --quiet | grep -q .; then
         echo "❌ DEPLOYMENT: No services running"
-        echo "🚀 FIX: Run 'just infra' to start services"
+        echo "🚀 FIX: Run 'just up' to start services"
         exit 1
     fi
     
@@ -500,6 +543,142 @@ migrate-container:
 env:
     docker exec {{ container_name }} env | sort
 
+# === Newcomer Support Commands ===
+
+# NEWCOMER SETUP: Complete guided setup for first-time users
+newcomer-setup:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    echo "🚀 Newcomer Setup - Welcome to Minecraft Marketplace!"
+    echo "=================================================="
+    echo ""
+    echo "   ✅ OUTCOME: Complete setup in 3-5 minutes"
+    echo "   🎯 PURPOSE: Get you contributing quickly"
+    echo "   📋 STEPS: Environment → Services → Tests → Success!"
+    echo ""
+    
+    start_time=$(date +%s)
+    
+    echo "📝 Step 1/4: Setting up environment..."
+    if [ ! -f .env ]; then
+        cp .env.example .env
+        echo "   ✅ Environment template copied (.env created)"
+    else
+        echo "   ✅ Environment file already exists"
+    fi
+    
+    echo ""
+    echo "🐳 Step 2/4: Starting services (this may take 30-60 seconds)..."
+    if just up > /dev/null 2>&1; then
+        echo "   ✅ All services started successfully"
+    else
+        echo "   ❌ Service startup failed - check 'just logs'"
+        exit 1
+    fi
+    
+    echo ""
+    echo "🏥 Step 3/4: Running health check..."
+    sleep 5  # Give services time to fully start
+    if curl -f -s http://localhost:7410 > /dev/null 2>&1; then
+        echo "   ✅ Main interface responding at http://localhost:7410"
+    else
+        echo "   ⚠️  Services still starting up - try 'just health' in 30 seconds"
+    fi
+    
+    echo ""
+    echo "🧪 Step 4/4: Running quick test to verify everything works..."
+    if npm run test:fast > /dev/null 2>&1; then
+        echo "   ✅ Fast tests passing (322+ tests in <1 second)"
+    else
+        echo "   ⚠️  Some tests may need attention - run 'npm run test:fast'"
+    fi
+    
+    end_time=$(date +%s)
+    duration=$((end_time - start_time))
+    
+    echo ""
+    echo "🎉 NEWCOMER SETUP COMPLETE!"
+    echo "⏱️  Total time: ${duration} seconds"
+    echo ""
+    echo "🌐 Your marketplace: http://localhost:7410"
+    echo ""
+    echo "📚 Next steps for newcomers:"
+    echo "   • just tour           - Learn the project structure"
+    echo "   • just ports          - See all service ports"
+    echo "   • npm run test:fast   - Run tests (instant feedback)"
+    echo "   • just newcomer-help  - Get help when stuck"
+    echo ""
+    echo "🎯 Ready to contribute! Pick a failing test and make it pass."
+
+# NEWCOMER HELP: Quick help when things go wrong
+newcomer-help:
+    @echo "🆘 Newcomer Help - When Things Go Wrong"
+    @echo "======================================"
+    @echo ""
+    @echo "🚨 COMMON ISSUES & SOLUTIONS:"
+    @echo ""
+    @echo "❌ 'Cannot find compose.yml'"
+    @echo "   💡 Our files are in config/docker/. Use 'just up' instead of 'docker compose up'"
+    @echo ""
+    @echo "❌ 'Port 7410 connection refused'"
+    @echo "   💡 Services still starting. Wait 30s, then try 'just health'"
+    @echo ""
+    @echo "❌ 'Tests taking forever'"
+    @echo "   💡 Use 'npm run test:fast' for instant feedback. Regular 'npm test' needs infrastructure"
+    @echo ""
+    @echo "❌ 'Too many technologies - overwhelmed'"
+    @echo "   💡 Start with 'npm run test:fast'. You don't need to understand everything immediately"
+    @echo ""
+    @echo "❌ 'Which Epic should I work on?'"
+    @echo "   💡 Run 'npm run test:fast' and pick the simplest failing test first"
+    @echo ""
+    @echo "❌ 'Port conflicts with other projects'"
+    @echo "   💡 We use ports 7410-7419 specifically to avoid conflicts. Stop other services if needed"
+    @echo ""
+    @echo "🆘 STILL STUCK?"
+    @echo "   • just status    - Check what's running"
+    @echo "   • just logs      - See what's happening"
+    @echo "   • just health    - Full system check"
+    @echo "   • just down      - Stop everything and start over"
+
+# PROJECT TOUR: Guided tour of project structure for newcomers
+tour:
+    @echo "🗺️  Minecraft Marketplace Project Tour"
+    @echo "====================================="
+    @echo ""
+    @echo "   ✅ OUTCOME: Understand where everything is"
+    @echo "   🎯 PURPOSE: Navigate the codebase confidently"
+    @echo "   💡 TIP: Don't memorize everything - just know where to look"
+    @echo ""
+    @echo "📁 MAIN DIRECTORIES:"
+    @echo "   • workspaces/frontend/     - Astro + Svelte UI (what users see)"
+    @echo "   • workspaces/backend/      - Hono API server (business logic)"
+    @echo "   • workspaces/shared/       - Common types/utilities (shared code)"
+    @echo "   • tests/unit/              - Fast tests (⭐ START HERE for development!)"
+    @echo "   • tests/integration/       - Slower tests (need database)"
+    @echo "   • config/                  - All configuration files"
+    @echo "   • docs/                    - Human documentation"
+    @echo "   • specs/                   - Technical requirements"
+    @echo ""
+    @echo "📋 KEY FILES:"
+    @echo "   • README.md                - Project overview & setup"
+    @echo "   • CLAUDE.md                - Complete development context"
+    @echo "   • package.json             - Dependencies & scripts"
+    @echo "   • justfile                 - This file! (deployment commands)"
+    @echo "   • config/docker/compose.yml - Production deployment"
+    @echo ""
+    @echo "🧪 TESTING STRATEGY:"
+    @echo "   • tests/unit/*.fast.test.ts - Instant feedback (use MSW mocking)"
+    @echo "   • tests/integration/        - Real database tests (slower)"
+    @echo "   • tests/collaboration/      - Validate handoff process"
+    @echo ""
+    @echo "🎯 FOR NEWCOMERS - RECOMMENDED PATH:"
+    @echo "   1. Run 'npm run test:fast' to see current status"
+    @echo "   2. Pick one failing test in tests/unit/"
+    @echo "   3. Make it pass using TDD approach"
+    @echo "   4. Repeat until comfortable with codebase"
+
 # === Collaboration Commands ===
 
 # FRESH INSTALL TEST: Simulate new user deployment experience
@@ -542,7 +721,7 @@ fresh-install:
     # Deploy services
     echo ""
     echo "🚀 STEP 3: Deploying services..."
-    if just infra; then
+    if just up; then
         echo "   ✅ Services deployed successfully"
     else
         echo "   ❌ Deployment failed"
@@ -686,7 +865,7 @@ help:
     
     🚀 GETTING STARTED (Most Common Commands):
     -----------------------------------------
-    just infra           # 🎯 DEPLOY PRODUCTION → http://localhost:7410
+    just up              # 🎯 DEPLOY PRODUCTION → http://localhost:7410
     just status          # 📊 CHECK if services are running
     just health          # 🏥 VALIDATE all services working
     just logs            # 📋 VIEW live application logs
@@ -694,8 +873,7 @@ help:
     
     🔧 DEVELOPMENT COMMANDS:
     -----------------------
-    just up              # 🔄 DEVELOPMENT MODE with file watching
-    just dev             # 🔥 START dev servers (requires infra first)
+    just dev             # 🔥 DEVELOPMENT MODE with hot reload
     just fresh-install   # 🆕 TEST complete deployment from scratch
     just demo            # 🎯 PREPARE for stakeholder demo
     
@@ -713,8 +891,8 @@ help:
             
     🎯 QUICK REFERENCE:
     ------------------
-    • Production deployment: just infra
-    • Development mode: just up
+    • Production deployment: just up
+    • Development mode: just dev
     • Check if working: just health
     • View what's happening: just logs
     • Stop everything: just down

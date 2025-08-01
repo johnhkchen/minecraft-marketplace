@@ -48,7 +48,7 @@ export async function setupIntegrationTests() {
       // Use existing infrastructure
       testUrls = {
         postgres: 'postgresql://localhost:5432/marketplace', // Default
-        postgrest: environment.postgrestUrl || 'http://localhost:2888/api/data',
+        postgrest: environment.postgrestUrl || 'http://localhost:7410/api/data',
         postgresDirect: 'postgresql://localhost:5432/marketplace'
       };
       

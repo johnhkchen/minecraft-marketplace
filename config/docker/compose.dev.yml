@@ -1,92 +1,116 @@
-# Development Environment - Uncommon Ports to Avoid Conflicts
-# Usage: docker compose -f compose.dev.yml up
-# Uses uncommon ports: 7410-7419 range
+# Development Configuration with Hot Reload
+# Fast development with source mounting and live reloading
 
 services:
   # ============================================================================
-  # nginx Reverse Proxy - Development Entry Point
+  # Development Frontend - Hot Reload with Source Mounting
   # ============================================================================
-  nginx:
-    image: nginx:alpine
-    container_name: minecraft-marketplace-nginx-dev
-    ports:
-      - "7410:80"  # Single entry point on uncommon port
+  frontend:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile.frontend
+      target: builder  # Stop at builder stage for development
+    image: minecraft-marketplace-frontend:dev
+    container_name: minecraft-marketplace-frontend-dev
+    environment:
+      - NODE_ENV=development
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-minecraft_marketplace}
+      - POSTGRES_USER=${POSTGRES_USER:-marketplace_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+      - VALKEY_HOST=valkey
+      - VALKEY_PORT=6379
+      - ASTRO_SECRET_KEY=${ASTRO_SECRET_KEY:-dev_secret_key}
+      - ASTRO_SESSION_SECRET=${ASTRO_SESSION_SECRET:-dev_session_secret}
     volumes:
-      - ./infrastructure/docker/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      # Mount source files for hot reload
+      - ./workspaces/frontend/src:/app/workspaces/frontend/src:ro
+      - ./workspaces/shared/src:/app/workspaces/shared/src:ro
+      - ./workspaces/frontend/package.json:/app/workspaces/frontend/package.json:ro
+      - ./uploads:/app/uploads
+      # Exclude node_modules and dist to avoid conflicts
+      - /app/workspaces/frontend/node_modules
+      - /app/workspaces/frontend/dist
+    ports:
+      - "4321:4321"  # Direct access for development
     depends_on:
-      - postgrest
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+    command: ["npm", "run", "dev", "--workspace=workspaces/frontend"]
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/nginx-health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   # ============================================================================
-  # PostgreSQL Database - Development
+  # Development Backend - Hot Reload with Source Mounting
   # ============================================================================
-  postgres:
-    image: postgres:17-alpine
-    container_name: minecraft-marketplace-postgres-dev
+  backend:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile.backend
+      target: builder  # Stop at builder stage for development
+    image: minecraft-marketplace-backend:dev
+    container_name: minecraft-marketplace-backend-dev
+    environment:
+      - NODE_ENV=development
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-minecraft_marketplace}
+      - POSTGRES_USER=${POSTGRES_USER:-marketplace_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+      - HONO_JWT_SECRET=${HONO_JWT_SECRET:-dev_jwt_secret}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - BAML_API_KEY=${BAML_API_KEY}
+    volumes:
+      # Mount source files for hot reload
+      - ./workspaces/backend/src:/app/workspaces/backend/src:ro
+      - ./workspaces/shared/src:/app/workspaces/shared/src:ro
+      - ./workspaces/backend/package.json:/app/workspaces/backend/package.json:ro
+      # Exclude node_modules to avoid conflicts
+      - /app/workspaces/backend/node_modules
+      - /app/workspaces/backend/dist
     ports:
-      - "7414:5432"  # Uncommon port to avoid conflicts
+      - "3001:3001"  # Direct access for development  
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["npm", "run", "dev", "--workspace=workspaces/backend"]
+    restart: unless-stopped
+
+  # ============================================================================
+  # Database - Same as production but with dev database
+  # ============================================================================
+  db:
+    image: postgres:17-alpine
+    container_name: minecraft-marketplace-db-dev
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-minecraft_marketplace_dev}
       - POSTGRES_USER=${POSTGRES_USER:-dev_user}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dev_password_2024}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dev_password}
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - ./database:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"  # Expose for development tools
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dev_user} -d ${POSTGRES_DB:-minecraft_marketplace_dev}"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    command: >
-      postgres
-      -c shared_preload_libraries=pg_stat_statements
-      -c pg_stat_statements.track=all
-      -c max_connections=100
-      -c log_statement=all
-      -c log_min_duration_statement=0
-
-  # PostgREST API - Development
-  postgrest:
-    image: postgrest/postgrest:v12.0.2
-    container_name: minecraft-marketplace-postgrest-dev
-    ports:
-      - "7413:3000"  # Uncommon port to avoid conflicts
-    environment:
-      - PGRST_DB_URI=postgres://${POSTGRES_USER:-dev_user}:${POSTGRES_PASSWORD:-dev_password_2024}@postgres:5432/${POSTGRES_DB:-minecraft_marketplace_dev}
-      - PGRST_DB_SCHEMAS=public
-      - PGRST_DB_ANON_ROLE=${POSTGREST_ANON_ROLE:-anon}
-      - PGRST_JWT_SECRET=${POSTGREST_JWT_SECRET:-dev_jwt_secret_2024}
-      - PGRST_DB_USE_LEGACY_GUCS=false
-      - PGRST_LOG_LEVEL=info
-      - PGRST_OPENAPI_SERVER_PROXY_URI=http://localhost:7413
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
 
-  # Valkey/Redis - Development
+  # ============================================================================
+  # Session Storage - Valkey for Development
+  # ============================================================================
   valkey:
     image: valkey/valkey:8.1-alpine
     container_name: minecraft-marketplace-valkey-dev
-    ports:
-      - "7415:6379"  # Uncommon port to avoid conflicts
     volumes:
       - valkey_dev_data:/data
+    ports:
+      - "6379:6379"  # Expose for development tools
     restart: unless-stopped
     command: >
       valkey-server
@@ -94,23 +118,41 @@ services:
       --appendfsync everysec
       --maxmemory 128mb
       --maxmemory-policy allkeys-lru
-    healthcheck:
-      test: ["CMD", "valkey-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
+  # ============================================================================
+  # PostgREST - Auto-generated API for Development
+  # ============================================================================
+  postgrest:
+    image: postgrest/postgrest:v12.0.2
+    container_name: minecraft-marketplace-postgrest-dev
+    environment:
+      - PGRST_DB_URI=postgres://${POSTGRES_USER:-dev_user}:${POSTGRES_PASSWORD:-dev_password}@db:5432/${POSTGRES_DB:-minecraft_marketplace_dev}
+      - PGRST_DB_SCHEMAS=public
+      - PGRST_DB_ANON_ROLE=${POSTGREST_ANON_ROLE:-anon}
+      - PGRST_JWT_SECRET=${POSTGREST_JWT_SECRET:-dev_jwt_secret}
+      - PGRST_LOG_LEVEL=info
+    ports:
+      - "3000:3000"  # Direct access for development
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+# ============================================================================
+# Development Volumes
+# ============================================================================
 volumes:
   postgres_dev_data:
+    driver: local
+    name: minecraft-marketplace-postgres-dev-data
   valkey_dev_data:
+    driver: local
+    name: minecraft-marketplace-valkey-dev-data
 
-# Development Notes:
-# - Frontend dev server: npm run dev:frontend (port 7411)
-# - Backend dev server: npm run dev:backend (port 7412)  
-# - Database accessible at: localhost:7414
-# - PostgREST API at: http://localhost:7413
-# - Valkey/Redis at: localhost:7415
-#
-# Access URLs:
-# - API Documentation: http://localhost:7413
-# - Database direct: postgresql://dev_user:dev_password_2024@localhost:7414/minecraft_marketplace_dev
+# ============================================================================
+# Development Network
+# ============================================================================  
+networks:
+  default:
+    name: minecraft-marketplace-dev-network
+    driver: bridge

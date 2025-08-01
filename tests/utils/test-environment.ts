@@ -38,7 +38,7 @@ async function quickServiceCheck(url: string, timeoutMs: number = 2000): Promise
  * Detect current test environment capabilities
  */
 export async function detectTestEnvironment(): Promise<TestEnvironment> {
-  const NGINX_BASE_URL = process.env.NGINX_BASE_URL || 'http://localhost:2888';
+  const NGINX_BASE_URL = process.env.NGINX_BASE_URL || 'http://localhost:7410';
   const POSTGREST_API_URL = `${NGINX_BASE_URL}/api/data`;
   
   // Quick parallel checks with short timeouts

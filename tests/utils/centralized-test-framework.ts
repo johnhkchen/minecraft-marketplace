@@ -158,7 +158,7 @@ export class EpicTestScenarios {
         healthEndpoints: [
           'http://localhost:4321/api/health',
           'http://localhost:3001/health', 
-          'http://localhost:2888/'
+          'http://localhost:7410/'
         ]
       },
       

@@ -21,7 +21,7 @@ const PROJECT_ROOT = join(process.cwd());
 
 describe('Fresh Install Process Validation', () => {
   it('validates docker compose configuration exists and is valid', async () => {
-    const composePath = join(PROJECT_ROOT, 'compose.yml');
+    const composePath = join(PROJECT_ROOT, 'config/docker/compose.yml');
     
     try {
       await access(composePath);
@@ -203,7 +203,7 @@ describe('Documentation Completeness Validation', () => {
 
 describe('Deployment Configuration Validation', () => {
   it('validates deployment configuration exists for standard platforms', async () => {
-    const composePath = join(PROJECT_ROOT, 'compose.yml');
+    const composePath = join(PROJECT_ROOT, 'config/docker/compose.yml');
     
     try {
       const composeContent = await readFile(composePath, 'utf-8');

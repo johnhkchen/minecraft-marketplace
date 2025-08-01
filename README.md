@@ -2,30 +2,59 @@
 
 > **Discord-native community marketplace for Minecraft server economies with evidence-based reporting and AI-enhanced item processing**
 
+## 📖 Documentation Guide
+**New to the project? Start here to find what you need:**
+- **🚀 Setup & Quick Start:** This README (you're here! - setup + quick tour)
+- **💻 Development Guide:** [CLAUDE.md](CLAUDE.md) (complete context for coding & architecture)
+- **📋 Requirements:** [specs/MINECRAFT_MARKETPLACE_SPEC.md](specs/MINECRAFT_MARKETPLACE_SPEC.md) (what we're building)
+- **🤝 Contributing:** [docs/development/contributing.md](docs/development/contributing.md) (how to add features)
+- **🆘 Troubleshooting:** [docs/setup/common-issues.md](docs/setup/common-issues.md) (when things go wrong)
+- **🏗️ Deep Dive:** [docs/](docs/) directory (detailed guides & reports)
+
+💡 **Newcomer tip:** Start with `just newcomer-setup` for guided onboarding!
+
 ## 🚀 **Quick Start**
+
+### **🆕 For Newcomers (Recommended)**
+**Never used this project before? Start here:**
+
+```bash
+# 1. Clone and enter directory
+git clone <repository-url>
+cd minecraft-marketplace
+
+# 2. One-command setup (3-5 minutes)
+just newcomer-setup
+
+# 3. Start developing immediately
+npm run test:newcomer      # See tests pass in <1 second
+just ports                # Learn about our service ports
+just tour                 # Understand project structure
+```
+
+**Need help?** Run `just newcomer-help` for troubleshooting.
 
 ### **For Human Developers: GitHub Codespace + Nix**
 **The fastest way to start contributing**:
 
 1. **Open in GitHub Codespace** (click "Code" → "Codespaces" → "Create codespace")
-2. **Wait for automatic setup** (Nix environment + dependencies installed)
+2. **Wait for automatic setup** (dependencies installed automatically)
 3. **Start developing**:
    ```bash
-   nix develop                    # Enter development environment
-   docker compose up -d           # Start services  
+   docker compose -f config/docker/compose.dev.yml up -d  # Start infrastructure
    npm run dev                    # Start frontend + backend with hot reload
    npm run test:fast              # Run 240 tests in ~80ms
    ```
 
 **That's it!** You're ready to contribute with full hot-reload development.
 
-### **Alternative: Local Development with Nix**
+### **Alternative: Local Development**
 If you prefer local development:
 ```bash
 git clone <repository-url>
 cd minecraft-marketplace
-nix develop                      # Or 'nix-shell' for legacy Nix
-docker compose up -d             # Start infrastructure
+npm install                      # Install dependencies
+docker compose -f config/docker/compose.dev.yml up -d  # Start infrastructure
 npm run dev                      # Start development servers
 ```
 
@@ -49,8 +78,45 @@ That's it! The script handles everything:
 **Access Points:**
 - **🌐 Main Application**: http://localhost:7410
 - **📚 API Documentation**: http://localhost:7410/docs  
-- **🗄️ Database API**: http://localhost:7413
-- **⚡ Backend API**: http://localhost:7412
+
+## 🏗️ **Architecture Overview**
+
+**Simple, Modern Stack:**
+```
+┌─ Frontend (Astro + Svelte) ──────────────┐
+│  🌐 http://localhost:4321 (development)   │
+│  • Server-side rendering                 │
+│  • Interactive components                │ 
+│  • Hot reload for fast iteration         │
+└─────────────────┬─────────────────────────┘
+                  │
+┌─ Backend (Hono API) ─────────────────────┐
+│  ⚡ http://localhost:3001 (development)   │
+│  • External integrations                 │
+│  • Discord webhooks                      │
+│  • AI item processing                    │
+└─────────────────┬─────────────────────────┘
+                  │
+┌─ Database API (PostgREST) ──────────────┐
+│  🗄️  http://localhost:3000 (development)  │
+│  • Auto-generated REST API               │
+│  • No boilerplate code needed            │
+│  • Row-level security built-in           │
+└─────────────────┬─────────────────────────┘
+                  │
+┌─ Database (PostgreSQL) ─────────────────┐
+│  🐘 postgresql://localhost:5432          │
+│  • ACID transactions                     │
+│  • Full-text search                      │
+│  • JSON support for flexibility          │
+└───────────────────────────────────────────┘
+```
+
+**Key Benefits:**
+- ⚡ **Fast development**: MSW-mocked tests run in <1 second
+- 🔒 **Secure by default**: Row-level security + JWT authentication  
+- 🚀 **Deploy anywhere**: Single Docker command works everywhere
+- 🧪 **Test-driven**: 320+ tests ensure reliability
 
 ## 📋 **Project Overview**
 
@@ -90,16 +156,20 @@ This project uses **foundation-first development** with SOLID principles, depend
 
 ### **Key Commands**
 ```bash
-# Development environment
-docker compose -f infrastructure/docker/compose.dev.yml up
+# Development environment (Docker only)
+docker compose -f config/docker/compose.dev.yml up -d
+
+# Development with hot reload (after Docker infrastructure)
+npm run dev
 
 # Run tests
-npm test                    # Vitest unit + integration
-npm run test:e2e           # Playwright end-to-end
+npm run test:fast          # Fast tests (240 tests in ~80ms)
+npm test                   # All tests
+npm run test:e2e          # Playwright end-to-end
 
-# Code quality
-npm run lint               # ESLint + Prettier
-npm run type-check         # TypeScript validation
+# Code quality  
+npm run lint              # ESLint + Prettier
+npm run type-check        # TypeScript validation
 ```
 
 ## 📚 **Documentation**

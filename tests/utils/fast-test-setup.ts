@@ -254,6 +254,129 @@ const fastHandlers = [
   // Discord Webhooks
   http.post(TEST_ENDPOINTS.discord.webhook, () => {
     return HttpResponse.json({}, { status: 204 });
+  }),
+
+  // Listings with details endpoint for MarketplaceBrowser component
+  http.get('http://localhost:3000/api/data/listings_with_details', ({ request }) => {
+    const url = new URL(request.url);
+    const limit = url.searchParams.get('limit');
+    
+    let listings = [
+      {
+        listing_id: 123,
+        seller_id: TEST_DATA.userId,
+        seller_name: TEST_DATA.userId,
+        item_id: TEST_DATA.itemId,
+        item_name: 'Diamond Sword',
+        category: 'weapons',
+        price: 5.0,
+        price_diamonds: 5.0,
+        trading_unit: 'per_item',
+        qty: 3,
+        stock_quantity: 3,
+        server_name: TEST_DATA.serverId,
+        shop_name: 'Test Shop',
+        is_active: true,
+        date_created: '2025-01-01T00:00:00Z'
+      },
+      {
+        listing_id: 124,
+        seller_id: 'alex',
+        seller_name: 'alex',
+        item_id: 'minecraft:oak_wood',
+        item_name: 'Oak Wood',
+        category: 'blocks',
+        price: 0.5,
+        price_diamonds: 0.5,
+        trading_unit: 'per_stack',
+        qty: 10,
+        stock_quantity: 10,
+        server_name: 'CreativeWorld',
+        shop_name: 'Wood Shop',
+        is_active: true,
+        date_created: '2025-01-01T01:00:00Z'
+      }
+    ];
+    
+    if (limit) {
+      listings = listings.slice(0, parseInt(limit, 10));
+    }
+    
+    return HttpResponse.json(listings);
+  }),
+
+  // Items endpoint for search/filter operations - handle any query parameters
+  http.get('http://localhost:3000/api/data/items', ({ request }) => {
+    const url = new URL(request.url);
+    
+    // Handle PostgREST select and distinct queries
+    const select = url.searchParams.get('select');
+    const distinct = url.searchParams.get('distinct');
+    
+    // Extract search/filter parameters (ignoring malformed duplicates)
+    const nameFilter = url.searchParams.get('name');
+    const categoryFilter = url.searchParams.get('category');
+    const serverFilter = url.searchParams.get('server_name');
+    const minPrice = url.searchParams.get('price_diamonds')?.match(/gte\.(\d+\.?\d*)/)?.[1];
+    const maxPrice = url.searchParams.get('price_diamonds')?.match(/lte\.(\d+\.?\d*)/)?.[1];
+    
+    // Use existing fast test items
+    let items = [
+      fastItem(),
+      fastItem({ 
+        id: '457', 
+        name: 'Iron Sword', 
+        minecraft_id: 'minecraft:iron_sword',
+        category: 'weapons',
+        price_diamonds: 1.5,
+        server_name: 'CreativeWorld'
+      }),
+      fastItem({ 
+        id: '458', 
+        name: 'Oak Wood', 
+        minecraft_id: 'minecraft:oak_wood',
+        category: 'blocks',
+        price_diamonds: 0.5,
+        server_name: 'CreativeWorld'
+      })
+    ];
+    
+    // Apply filters
+    if (nameFilter && nameFilter.includes('ilike')) {
+      const searchTerm = nameFilter.match(/ilike\.\*([^*]+)\*/)?.[1]?.toLowerCase();
+      if (searchTerm) {
+        items = items.filter(item => item.name.toLowerCase().includes(searchTerm));
+      }
+    }
+    
+    if (categoryFilter && categoryFilter.includes('eq.')) {
+      const category = categoryFilter.replace('eq.', '');
+      items = items.filter(item => item.category === category);
+    }
+    
+    if (serverFilter && serverFilter.includes('eq.')) {
+      const server = serverFilter.replace('eq.', '');
+      items = items.filter(item => item.server_name === server);
+    }
+    
+    if (minPrice) {
+      items = items.filter(item => item.price_diamonds >= parseFloat(minPrice));
+    }
+    
+    if (maxPrice) {
+      items = items.filter(item => item.price_diamonds <= parseFloat(maxPrice));
+    }
+    
+    // Handle PostgREST select and distinct queries
+    if (select === 'server_name' && distinct === 'server_name') {
+      // Return unique server names only
+      const uniqueServers = Array.from(new Set(items.map(item => item.server_name)))
+        .filter(Boolean)
+        .map(server_name => ({ server_name }));
+      return HttpResponse.json(uniqueServers);
+    }
+    
+    return HttpResponse.json(items);
   })
 ];
 
@@ -263,7 +386,7 @@ const fastServer = setupServer(...fastHandlers);
 // Universal setup - use in any test file
 export const setupFastTests = () => {
   beforeAll(() => {
-    fastServer.listen({ onUnhandledRequest: 'error' });
+    fastServer.listen({ onUnhandledRequest: 'warn' });
   });
 
   afterEach(() => {

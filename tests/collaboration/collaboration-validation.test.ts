@@ -57,8 +57,8 @@ describe('Requirement 1: Fresh Machine Setup Without Custom Configuration', () =
   });
 
   it('uses uncommon ports (7410-7419) to avoid conflicts', async () => {
-    const composeContent = await fs.readFile('compose.yml', 'utf-8');
-    const composeDevContent = await fs.readFile('compose.dev.yml', 'utf-8');
+    const composeContent = await fs.readFile('config/docker/compose.yml', 'utf-8');
+    const composeDevContent = await fs.readFile('config/docker/compose.dev.yml', 'utf-8');
     
     // Verify uncommon port range usage
     expect(composeContent).toContain('7410:80'); // nginx entry point
@@ -87,7 +87,7 @@ describe('Requirement 1: Fresh Machine Setup Without Custom Configuration', () =
 // ===== REQUIREMENT 2: WORKING DEMO =====
 describe('Requirement 2: Working Demo Others Can Access', () => {
   it('has deployment configuration for standard platforms', async () => {
-    const deploymentFiles = ['compose.yml', 'Dockerfile'];
+    const deploymentFiles = ['config/docker/compose.yml', 'Dockerfile'];
     const hasDeploymentConfig = await Promise.all(
       deploymentFiles.map(file => fs.access(file).then(() => true).catch(() => false))
     );
@@ -95,7 +95,7 @@ describe('Requirement 2: Working Demo Others Can Access', () => {
     expect(hasDeploymentConfig.every(exists => exists)).toBe(true);
     
     // Verify production-ready compose file
-    const composeContent = await fs.readFile('compose.yml', 'utf-8');
+    const composeContent = await fs.readFile('config/docker/compose.yml', 'utf-8');
     expect(composeContent).toMatch(/postgres/);
     expect(composeContent).toMatch(/nginx/);
   });
@@ -181,7 +181,7 @@ describe('Requirement 3: Documentation Enables Contribution', () => {
 // ===== REQUIREMENT 4: DEPLOYABLE BY NON-BUILDER =====
 describe('Requirement 4: Deployable by Someone Who Didn\'t Build It', () => {
   it('uses only standard Docker images', async () => {
-    const composeContent = await fs.readFile('compose.yml', 'utf-8');
+    const composeContent = await fs.readFile('config/docker/compose.yml', 'utf-8');
     
     // Must use well-known images
     expect(composeContent).toMatch(/postgres:\d+/);
@@ -194,7 +194,7 @@ describe('Requirement 4: Deployable by Someone Who Didn\'t Build It', () => {
   });
 
   it('externalizes all configuration properly', async () => {
-    const composeContent = await fs.readFile('compose.yml', 'utf-8');
+    const composeContent = await fs.readFile('config/docker/compose.yml', 'utf-8');
     
     // Must use environment variables
     const envVars = composeContent.match(/\$\{[^}]+\}/g) || [];
@@ -206,7 +206,7 @@ describe('Requirement 4: Deployable by Someone Who Didn\'t Build It', () => {
   });
 
   it('works on standard platforms without host-specific config', async () => {
-    const composeContent = await fs.readFile('compose.yml', 'utf-8');
+    const composeContent = await fs.readFile('config/docker/compose.yml', 'utf-8');
     
     // Should not require host-specific paths
     expect(composeContent).not.toContain('/usr/local/');
@@ -319,8 +319,8 @@ describe('Requirement 7: Working Code Without Debugging Environment Issues', () 
   });
 
   it('has health checks for all critical services', async () => {
-    const composeContent = await fs.readFile('compose.yml', 'utf-8');
-    const composeDevContent = await fs.readFile('compose.dev.yml', 'utf-8');
+    const composeContent = await fs.readFile('config/docker/compose.yml', 'utf-8');
+    const composeDevContent = await fs.readFile('config/docker/compose.dev.yml', 'utf-8');
     
     // Services must have health checks
     expect(composeContent).toMatch(/healthcheck:/);
@@ -524,7 +524,7 @@ describe('Definition of Done: Project-Specific Requirements', () => {
     });
 
     it('validates production deployment readiness', async () => {
-      const composeContent = await fs.readFile('compose.yml', 'utf-8');
+      const composeContent = await fs.readFile('config/docker/compose.yml', 'utf-8');
       
       // Must have health checks
       expect(composeContent).toMatch(/healthcheck:/);
@@ -560,8 +560,8 @@ describe('Definition of Done: Project-Specific Requirements', () => {
 
   describe('Demo Requirements', () => {
     it('provides accessible demo configuration', async () => {
-      const composeDemo = await fs.access('compose.demo.yml').then(() => true).catch(() => false);
-      const composeDev = await fs.access('compose.dev.yml').then(() => true).catch(() => false);
+      const composeDemo = await fs.access('config/docker/compose.demo.yml').then(() => true).catch(() => false);
+      const composeDev = await fs.access('config/docker/compose.dev.yml').then(() => true).catch(() => false);
       
       expect(composeDemo || composeDev).toBe(true);
       
@@ -603,7 +603,7 @@ describe('Definition of Done: Project-Specific Requirements', () => {
       const quickstart = await fs.readFile('docs/setup/quick-start.md', 'utf-8');
       expect(quickstart).toContain('Troubleshooting');
       
-      const composeContent = await fs.readFile('compose.yml', 'utf-8');
+      const composeContent = await fs.readFile('config/docker/compose.yml', 'utf-8');
       expect(composeContent).toMatch(/healthcheck:/);
     });
   });
@@ -619,7 +619,7 @@ describe('Definition of Done: Project-Specific Requirements', () => {
     });
 
     it('externalizes all secrets and configuration', async () => {
-      const composeContent = await fs.readFile('compose.yml', 'utf-8');
+      const composeContent = await fs.readFile('config/docker/compose.yml', 'utf-8');
       
       // Must use environment variables
       expect(composeContent).toMatch(/\$\{[^}]+\}/);

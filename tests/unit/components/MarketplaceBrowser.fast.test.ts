@@ -113,7 +113,7 @@ describe('MarketplaceBrowser API Integration Logic - Fast Tests', () => {
       
       // Validate search results contain search term
       const hasSearchTerm = result.some(item => 
-        item.item_name.toLowerCase().includes('diamond')
+        item.name.toLowerCase().includes('diamond')
       );
       expect(hasSearchTerm).toBe(true);
       
@@ -160,7 +160,7 @@ describe('MarketplaceBrowser API Integration Logic - Fast Tests', () => {
       
       expect(Array.isArray(result)).toBe(true);
       if (result.length > 0) {
-        expect(result.every(item => item.item_category === 'weapons')).toBe(true);
+        expect(result.every(item => item.category === 'weapons')).toBe(true);
       }
       
       expectFastExecution(timeMs, 5);
@@ -177,7 +177,7 @@ describe('MarketplaceBrowser API Integration Logic - Fast Tests', () => {
       expect(Array.isArray(result)).toBe(true);
       if (result.length > 0) {
         expect(result.every(item => 
-          item.price >= minPrice && item.price <= maxPrice
+          item.price_diamonds >= minPrice && item.price_diamonds <= maxPrice
         )).toBe(true);
       }
       

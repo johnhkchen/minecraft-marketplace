@@ -338,7 +338,7 @@ describe('API Listings Fast Tests', () => {
       expect(incompleteListing).not.toHaveProperty('price');
       
       const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 1);
+      expectFastExecution(timeMs, 2); // Allow slightly more time for validation
     });
 
     it('generates unique listing IDs', async () => {

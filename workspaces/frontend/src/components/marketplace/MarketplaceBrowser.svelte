@@ -2,7 +2,7 @@
   /**
    * MarketplaceBrowser - Main marketplace interface
    * Cherry-picked and adapted from reference implementation
-   * Following GAMEPLAN foundation-first approach with PostgREST integration
+   * Following GAMEPLAN foundation-first approach with API integration
    */
   
   import { formatPrice, formatTotalCost, formatAveragePrice, formatPriceRange } from '../../utils/price-display.js';
@@ -124,7 +124,7 @@
     };
   });
   
-  // Load items from PostgREST API
+  // Load items from API
   async function loadItems() {
     loading = true;
     error = null;
@@ -185,6 +185,34 @@
 </script>
 
 <div class="marketplace-browser">
+  <!-- User-centered heading -->
+  <header class="browser-header">
+    <h2>Find Items to Buy</h2>
+    <p class="header-description">Browse available items from community members</p>
+  </header>
+
+  <!-- Primary search -->
+  <div class="primary-search">
+    <label for="main-search">What are you looking for?</label>
+    <input 
+      id="main-search" 
+      type="text" 
+      placeholder="Search for diamond sword, oak wood, etc."
+      bind:value={searchTerm}
+    />
+    <p class="search-guidance">Try searching for popular items like "diamond sword" or "oak wood"</p>
+  </div>
+
+  <!-- More filters (progressive disclosure) -->
+  <details class="advanced-filters">
+    <summary>More filters</summary>
+    <div class="filters-content">
+      <label>Show me: <input type="text" placeholder="Category filter" /></label>
+      <label>Max price: <input type="number" placeholder="in diamond blocks" /></label>
+      <label>From seller: <input type="text" placeholder="Seller name" /></label>
+    </div>
+  </details>
+
   <!-- Market Statistics Header -->
   <div class="market-stats">
     <div class="stat-card">
@@ -237,14 +265,31 @@
     </div>
   {/if}
 
-  <!-- Items Grid -->
+  <!-- Items Grid with HATEOAS structure -->
   {#if !loading && !error}
     <div class="items-grid">
       {#each filteredItems as item (item.id)}
-        <ItemCard 
-          {item} 
-          onPurchase={() => handlePurchase(item)}
-        />
+        <article role="article" class="item-card">
+          <div class="item-status">
+            {#if item.is_available}
+              <span class="status-badge available">Available to buy</span>
+            {:else}
+              <span class="status-badge wanted">Someone wants this</span>
+            {/if}
+          </div>
+          <ItemCard 
+            {item} 
+            onPurchase={() => handlePurchase(item)}
+          />
+          <div class="item-actions">
+            <button class="buy-action" onclick={() => handlePurchase(item)}>
+              Buy Now
+            </button>
+            <button class="contact-action">
+              Contact Seller
+            </button>
+          </div>
+        </article>
       {:else}
         <div class="no-results">
           <h3>No items found</h3>
@@ -256,6 +301,10 @@
       {/each}
     </div>
   {/if}
+
+  <footer class="browser-footer">
+    <p>Browse with confidence - all items verified by the community</p>
+  </footer>
 </div>
 
 <style>

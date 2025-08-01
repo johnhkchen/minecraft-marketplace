@@ -3,7 +3,7 @@ import { setupInfrastructureOrSkip, type TestEnvironment } from './utils/test-en
 import { isDockerAvailable } from './utils/testcontainers-setup.js';
 
 // Test configuration using nginx proxy (single entry point)
-const NGINX_BASE_URL = process.env.NGINX_BASE_URL || 'http://localhost:2888';
+const NGINX_BASE_URL = process.env.NGINX_BASE_URL || 'http://localhost:7410';
 const POSTGREST_API_URL = `${NGINX_BASE_URL}/api/data`;
 const ASTRO_API_URL = `${NGINX_BASE_URL}/api`;
 

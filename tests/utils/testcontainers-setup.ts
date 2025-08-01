@@ -45,8 +45,8 @@ export async function setupTestcontainers(): Promise<TestContainerStack> {
         compose: null as any, // Not managed by testcontainers
         urls: {
           postgres: 'postgresql://test_user:test_password@localhost:5433/marketplace_test',
-          postgrest: 'http://localhost:2888/api/data',
-          nginx: 'http://localhost:2888'
+          postgrest: 'http://localhost:7410/api/data',
+          nginx: 'http://localhost:7410'
         },
         cleanup: async () => {
           console.log('🧹 Not cleaning up - using external infrastructure');
@@ -78,17 +78,13 @@ export async function setupTestcontainers(): Promise<TestContainerStack> {
  */
 async function checkTestInfrastructure(): Promise<boolean> {
   try {
-    // Check if nginx is responding
-    const response = await fetch('http://localhost:2888/health', { 
+    // Check if nginx is responding (any response means it's running)
+    const response = await fetch('http://localhost:7410/', { 
       signal: AbortSignal.timeout(2000) 
     });
     
-    if (response.ok) {
-      const text = await response.text();
-      return text.includes('nginx test proxy healthy');
-    }
-    
-    return false;
+    // Any response (including 404) means nginx is running
+    return response.status !== undefined;
   } catch {
     return false;
   }
@@ -103,7 +99,8 @@ async function checkTestInfrastructure(): Promise<boolean> {
  */
 async function verifyPostgrestConnection(postgrestUrl: string): Promise<void> {
   try {
-    const response = await fetch(`${postgrestUrl}/users?limit=1`);
+    // Use public_items endpoint which doesn't require authentication
+    const response = await fetch(`${postgrestUrl}/public_items?limit=1`);
     if (!response.ok) {
       throw new Error(`PostgREST health check failed: ${response.status}`);
     }

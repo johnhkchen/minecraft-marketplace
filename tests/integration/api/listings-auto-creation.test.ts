@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { setupInfrastructureOrSkip } from '../../setup.js';
+import { setupInfrastructureOrSkip } from '../../utils/test-environment.js';
 
 describe('Listings Auto-Creation Integration Tests', () => {
   beforeEach(async () => {

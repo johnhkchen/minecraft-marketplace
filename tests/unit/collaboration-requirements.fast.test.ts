@@ -35,7 +35,7 @@ describe('Requirement 1: Fresh Install Works on Any Machine', () => {
   });
 
   it('validates Nix development environment configuration', async () => {
-    const flakePath = join(PROJECT_ROOT, 'flake.nix');
+    const flakePath = join(PROJECT_ROOT, 'config/nix/flake.nix');
     
     try {
       await access(flakePath);
@@ -63,7 +63,7 @@ describe('Requirement 1: Fresh Install Works on Any Machine', () => {
     expect(packageJson.scripts['dev:backend']).toBeDefined();
   });
   it('validates docker compose file exists and has essential services', async () => {
-    const composePath = join(PROJECT_ROOT, 'compose.yml');
+    const composePath = join(PROJECT_ROOT, 'config/docker/compose.yml');
     
     try {
       await access(composePath);
@@ -214,7 +214,7 @@ describe('Requirement 3: Documentation Enables Contribution', () => {
 
 describe('Requirement 4: Deployable by Someone Who Didnt Build It', () => {
   it('validates standard docker deployment configuration', async () => {
-    const composePath = join(PROJECT_ROOT, 'compose.yml');
+    const composePath = join(PROJECT_ROOT, 'config/docker/compose.yml');
     const composeContent = await readFile(composePath, 'utf-8');
     
     // Standard docker services
@@ -233,18 +233,26 @@ describe('Requirement 4: Deployable by Someone Who Didnt Build It', () => {
     expect(readmeContent).toMatch(/deploy/i);
   });
 
-  it('validates infrastructure directory exists', async () => {
-    const infraPath = join(PROJECT_ROOT, 'infrastructure');
+  it('validates deployment configuration exists', async () => {
+    // Check for Docker configuration in config/docker/ (updated location)
+    const dockerConfigPath = join(PROJECT_ROOT, 'config/docker');
     
     try {
+      await access(dockerConfigPath);
+      const dockerContents = await readdir(dockerConfigPath);
+      
+      const hasComposeFile = dockerContents.some(file => file.includes('compose.yml'));
+      expect(hasComposeFile, 'Missing Docker compose configuration in config/docker/').toBe(true);
+      
+      // Check for database infrastructure
+      const infraPath = join(PROJECT_ROOT, 'infrastructure');
       await access(infraPath);
       const infraContents = await readdir(infraPath, { recursive: true });
-      
-      const hasDockerConfig = infraContents.some(file => file.includes('docker'));
-      expect(hasDockerConfig, 'Missing Docker configuration in infrastructure/').toBe(true);
+      const hasDatabaseConfig = infraContents.some(file => file.includes('database'));
+      expect(hasDatabaseConfig, 'Missing database configuration in infrastructure/').toBe(true);
       
     } catch (error) {
-      throw new Error(`Infrastructure directory missing: ${error}`);
+      throw new Error(`Deployment configuration missing: ${error}`);
     }
   });
 });
@@ -397,12 +405,18 @@ describe('Test Infrastructure Quality', () => {
 // ============================================================================
 
 async function checkDemoConfiguration(): Promise<boolean> {
-  // Check for demo-related files
-  const demoComposeFile = join(PROJECT_ROOT, 'compose.demo.yml');
+  // Check for demo-related files in config/docker directory
+  const demoComposeFile = join(PROJECT_ROOT, 'config/docker/compose.demo.yml');
+  const devComposeFile = join(PROJECT_ROOT, 'config/docker/compose.dev.yml');
   const infraDemoDir = join(PROJECT_ROOT, 'infrastructure', 'demo');
   
   try {
     await access(demoComposeFile);
+    return true;
+  } catch {}
+  
+  try {
+    await access(devComposeFile);
     return true;
   } catch {}
   
@@ -413,7 +427,7 @@ async function checkDemoConfiguration(): Promise<boolean> {
   
   // Check if main compose file has demo configuration
   try {
-    const composePath = join(PROJECT_ROOT, 'compose.yml');
+    const composePath = join(PROJECT_ROOT, 'config/docker/compose.yml');
     const composeContent = await readFile(composePath, 'utf-8');
     return composeContent.includes('demo') || composeContent.includes('example');
   } catch {}

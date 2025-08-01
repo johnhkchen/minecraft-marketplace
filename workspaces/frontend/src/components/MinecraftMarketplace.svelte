@@ -178,20 +178,24 @@
 
 <div class="minecraft-marketplace">
   <header class="marketplace-header">
-    <h1>🏗️ Minecraft Marketplace</h1>
-    <p class="subtitle">The NASDAQ of Minecraft - Efficient Item Trading Terminal</p>
-    <div class="server-info">
-      <span class="server-badge">🌐 LIVE at :2888</span>
-      <span class="tech-stack">Astro SSR + Svelte + PostgreSQL + PostgREST</span>
-    </div>
+    <h1>Minecraft Item Marketplace</h1>
+    <p class="subtitle">Buy and sell Minecraft items with your community</p>
+    <!-- Technical details moved to progressive disclosure -->
+    <details class="tech-details">
+      <summary>Technical Information</summary>
+      <div class="server-info">
+        <span class="server-badge">🌐 LIVE at :2888</span>
+        <span class="tech-stack">Astro SSR + Svelte + PostgreSQL</span>
+      </div>
+    </details>
     
     <div class="market-stats">
       <div class="stat">
-        <span class="stat-label">Active Listings:</span>
+        <span class="stat-label">Items for Sale:</span>
         <span class="stat-value">{totalListings}</span>
       </div>
       <div class="stat">
-        <span class="stat-label">Categories:</span>
+        <span class="stat-label">Item Types:</span>
         <span class="stat-value">{uniqueItems}</span>
       </div>
       <div class="stat">
@@ -247,14 +251,14 @@
         class:active={currentView === 'browse'}
         onclick={() => currentView = 'browse'}
       >
-        🔍 Browse Market
+        Browse Items
       </button>
       <button 
         class="nav-button"
         class:active={currentView === 'sell'}
         onclick={() => currentView = 'sell'}
       >
-        📦 List Item
+        Sell Items
       </button>
     </nav>
   </header>
@@ -283,12 +287,11 @@
   
   <footer class="marketplace-footer">
     <p>🏪 Connected to Redstone Mall Clearinghouse • 🌐 Running on :2888</p>
-    <p>💎 All transactions in Diamonds • Built with Foundation-First Architecture</p>
+    <p>💎 All prices in diamonds • Built with Foundation-First Architecture</p>
     <div class="footer-tech">
       <span>🚀 Astro SSR</span>
       <span>⚡ Svelte 5</span>
       <span>🐘 PostgreSQL</span>
-      <span>🔗 PostgREST</span>
       <span>📦 Docker</span>
       <span>🔒 nginx</span>
     </div>

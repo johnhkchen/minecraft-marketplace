@@ -33,6 +33,9 @@ services:
     build:
       context: .
       dockerfile: config/docker/Dockerfile.frontend
+      args:
+        - BUILD_TAG=${BUILD_TAG:-latest}
+    image: minecraft-marketplace-frontend:${BUILD_TAG:-latest}
     container_name: minecraft-marketplace-frontend
     environment:
       - NODE_ENV=production
@@ -64,6 +67,9 @@ services:
     build:
       context: .
       dockerfile: config/docker/Dockerfile.backend
+      args:
+        - BUILD_TAG=${BUILD_TAG:-latest}
+    image: minecraft-marketplace-backend:${BUILD_TAG:-latest}
     container_name: minecraft-marketplace-backend
     environment:
       - NODE_ENV=production
