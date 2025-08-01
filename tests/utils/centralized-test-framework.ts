@@ -18,46 +18,54 @@ import { setupFastTests, expectFastExecution } from './fast-test-setup.js';
 // ============================================================================
 
 export const MINECRAFT_TEST_DATA = {
-  // Minecraft usernames for realistic domain modeling
+  // Real marketplace users from actual server data
   users: {
-    mainTrader: 'steve',
-    altTrader: 'alex', 
-    adminUser: 'notch',
-    moderator: 'herobrine',
-    newUser: 'creeper123'
+    mainTrader: 'seller3',
+    altTrader: 'Hikoo', 
+    materialTrader: 'nethy',
+    woodTrader: '_Pythos692016',
+    woolTrader: '_kwix_'
   },
   
-  // Discord IDs mapped to users
+  // Discord IDs mapped to real users
   discordIds: {
-    steve: 'discord_steve_123456',
-    alex: 'discord_alex_789012', 
-    notch: 'discord_notch_admin',
-    herobrine: 'discord_herobrine_mod',
-    creeper123: 'discord_creeper_new'
+    seller3: '123456789012345003',
+    Hikoo: '123456789012345005',
+    nethy: '123456789012345004',
+    _Pythos692016: '123456789012345006',
+    _kwix_: '123456789012345007'
   },
   
-  // Minecraft items (without namespace for repository validation compatibility)
+  // Real marketplace items from actual transactions
   items: {
     diamond_sword: 'diamond_sword',
-    iron_pickaxe: 'iron_pickaxe',
-    netherite_axe: 'netherite_axe',
+    netherite_sword: 'netherite_sword',
+    diamond_pickaxe: 'diamond_pickaxe',
+    elytra: 'elytra',
     enchanted_book: 'enchanted_book',
-    diamond_block: 'diamond_block'
+    golden_apple: 'golden_apple',
+    gilded_blackstone: 'gilded_blackstone',
+    soul_speed_book: 'enchanted_book',
+    oak_log: 'oak_log',
+    wool: 'wool'
   },
   
-  // Server names from actual Minecraft community
+  // Real server names from marketplace data
   servers: {
-    primary: 'HermitCraft',
-    secondary: 'SMP-Live',
-    test: 'TestServer'
+    primary: 'Safe Survival',
+    secondary: 'Safe Survival',
+    building: 'Safe Survival',
+    skyblock: 'Safe Survival',
+    nether: 'Safe Survival'
   },
   
-  // Shop locations using Minecraft coordinates
+  // Real shop locations from marketplace
   shops: {
-    spawn_market: 'spawn_market',
-    steve_diamond_shop: 'steve_diamond_emporium',
-    alex_iron_works: 'alex_iron_works',
-    admin_shop: 'notch_admin_shop'
+    gear_shop: 'gear shop district',
+    nether_trading: 'nether trading post',
+    wood_district: 'wood district',
+    premium_tools: 'premium tools shop',
+    desert_warp: 'east of desert warp'
   }
 };
 
@@ -79,9 +87,15 @@ export class EpicTestScenarios {
           maxResponseTime: 2000 // Epic 1 requirement: <2s search
         },
         {
-          searchTerm: 'iron',
-          expectedItems: [MINECRAFT_TEST_DATA.items.iron_pickaxe],
+          searchTerm: 'elytra',
+          expectedItems: [MINECRAFT_TEST_DATA.items.elytra],
           expectedTrader: MINECRAFT_TEST_DATA.users.altTrader,
+          maxResponseTime: 2000
+        },
+        {
+          searchTerm: 'netherite',
+          expectedItems: [MINECRAFT_TEST_DATA.items.netherite_sword],
+          expectedTrader: MINECRAFT_TEST_DATA.users.mainTrader,
           maxResponseTime: 2000
         }
       ],
@@ -94,7 +108,12 @@ export class EpicTestScenarios {
         },
         {
           filterType: 'category', 
-          filterValue: 'weapons',
+          filterValue: 'tools',
+          maxResponseTime: 500
+        },
+        {
+          filterType: 'server',
+          filterValue: MINECRAFT_TEST_DATA.servers.nether,
           maxResponseTime: 500
         }
       ]
@@ -215,16 +234,16 @@ export class EpicTestScenarios {
     return {
       inventoryManagement: {
         owner: MINECRAFT_TEST_DATA.users.mainTrader,
-        shop: MINECRAFT_TEST_DATA.shops.steve_diamond_shop,
+        shop: MINECRAFT_TEST_DATA.shops.gear_shop,
         items: [
           MINECRAFT_TEST_DATA.items.diamond_sword,
-          MINECRAFT_TEST_DATA.items.diamond_block
+          MINECRAFT_TEST_DATA.items.elytra
         ]
       },
       
       dashboardAnalytics: {
         owner: MINECRAFT_TEST_DATA.users.altTrader,
-        shop: MINECRAFT_TEST_DATA.shops.alex_iron_works,
+        shop: MINECRAFT_TEST_DATA.shops.premium_tools,
         expectedMetrics: ['sales_count', 'revenue', 'popular_items']
       }
     };

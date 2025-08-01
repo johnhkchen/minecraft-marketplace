@@ -8,7 +8,16 @@
 import { http, HttpResponse } from 'msw';
 
 // TEMPORAL CONFIG - Update for your project's endpoints
-const BASE_URL = 'http://localhost:3000';
+// Detect if we're in Docker environment to match URLConstructionService behavior
+const isDockerDeployment = process.env.COMPOSE_PROJECT_NAME || 
+                          process.env.DOCKER_COMPOSE || 
+                          process.env.HOME === '/app' ||
+                          process.env.PATH?.includes('/app');
+
+const BASE_URL = isDockerDeployment ? 'http://localhost:7410' : 'http://localhost:3000';
+const DOCKER_BASE_URL = 'http://localhost:7410'; // Docker environment
+const DEV_BASE_URL = 'http://localhost:3000'; // Development environment
+
 const TEMPORAL_ENDPOINTS = {
   items: `${BASE_URL}/api/data/public_items`,
   itemsSimple: `${BASE_URL}/api/data/items`, // Simplified endpoint used by API service
@@ -24,7 +33,7 @@ const mockItem = (overrides = {}) => ({
   owner_id: 'user_123',
   name: 'Diamond Sword',
   category: 'weapons',
-  server_name: 'HermitCraft',
+  server_name: 'Safe Survival',
   price_diamonds: 5,
   trading_unit: 'per_item',
   stock_quantity: 5,
@@ -44,20 +53,139 @@ const mockUser = (overrides = {}) => ({
   ...overrides
 });
 
+// REALISTIC DATASET - 55 items from 7 shops matching real marketplace data
+const REALISTIC_MARKETPLACE_DATA = [
+  // Blocks & Materials
+  mockItem({ id: 'item_001', name: 'Iron Blocks', category: 'blocks', price_diamonds: 288.00, trading_unit: 'per_shulker', stock_quantity: 27, owner_shop_name: 'General Trading Post' }),
+  mockItem({ id: 'item_002', name: 'Gilded Blackstone', category: 'blocks', price_diamonds: 12.8, trading_unit: 'per_stack', stock_quantity: 102, owner_shop_name: 'Nether Materials Co' }),
+  mockItem({ id: 'item_003', name: 'Obsidian', category: 'blocks', price_diamonds: 4, trading_unit: 'per_stack', stock_quantity: 49, owner_shop_name: 'Nether Materials Co' }),
+  mockItem({ id: 'item_004', name: 'Crying Obsidian', category: 'blocks', price_diamonds: 4, trading_unit: 'per_stack', stock_quantity: 0, owner_shop_name: 'Nether Materials Co', is_available: false }),
+  mockItem({ id: 'item_005', name: 'Wool', category: 'blocks', price_diamonds: 9.00, trading_unit: 'per_shulker', stock_quantity: 100, owner_shop_name: 'Wool Warehouse' }),
+  
+  // Transportation (Elytra) - High value items
+  mockItem({ id: 'item_006', name: 'Normal Elytra', category: 'misc', price_diamonds: 162.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Elytra Emporium' }),
+  mockItem({ id: 'item_007', name: 'Enchanted Elytra', category: 'misc', price_diamonds: 207.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Elytra Emporium' }),
+  mockItem({ id: 'item_008', name: 'Regular Elytra', category: 'misc', price_diamonds: 252.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_009', name: 'Enchanted Cape', category: 'misc', price_diamonds: 270.00, trading_unit: 'per_item', stock_quantity: 3, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_010', name: 'Mythical Cape', category: 'misc', price_diamonds: 576.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Ultimate Gear Shop' }),
+  
+  // Weapons
+  mockItem({ id: 'item_011', name: 'Epic Blade', category: 'tools', price_diamonds: 270.00, trading_unit: 'per_item', stock_quantity: 2, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_012', name: 'Unbreakable Netherite Sword', category: 'tools', price_diamonds: 126.00, trading_unit: 'per_item', stock_quantity: 2, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_013', name: 'Unbreakable Diamond Sword', category: 'tools', price_diamonds: 126.00, trading_unit: 'per_item', stock_quantity: 0, owner_shop_name: 'Premium Tools & Weapons', is_available: false }),
+  mockItem({ id: 'item_014', name: 'Epic Blade Diamond Sword', category: 'tools', price_diamonds: 270.00, trading_unit: 'per_item', stock_quantity: 5, owner_shop_name: 'Premium Tools & Weapons' }),
+  mockItem({ id: 'item_015', name: 'Unbreakable Bow', category: 'tools', price_diamonds: 108.00, trading_unit: 'per_item', stock_quantity: 5, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_016', name: 'Unbreakable Crossbow', category: 'tools', price_diamonds: 90.00, trading_unit: 'per_item', stock_quantity: 3, owner_shop_name: 'Ultimate Gear Shop' }),
+  
+  // Tools
+  mockItem({ id: 'item_017', name: 'Unbreakable Diamond Pickaxe', category: 'tools', price_diamonds: 144.00, trading_unit: 'per_item', stock_quantity: 8, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_018', name: 'Unbreakable Netherite Pickaxe', category: 'tools', price_diamonds: 153.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_019', name: 'Unbreakable Diamond Pickaxe Hikoo', category: 'tools', price_diamonds: 153.00, trading_unit: 'per_item', stock_quantity: 10, owner_shop_name: 'Premium Tools & Weapons' }),
+  mockItem({ id: 'item_020', name: 'Unbreakable Diamond Shovel', category: 'tools', price_diamonds: 108.00, trading_unit: 'per_item', stock_quantity: 6, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_021', name: 'Unbreakable Netherite Shovel', category: 'tools', price_diamonds: 117.00, trading_unit: 'per_item', stock_quantity: 2, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_022', name: 'Unbreakable Diamond Hoe', category: 'tools', price_diamonds: 72.00, trading_unit: 'per_item', stock_quantity: 3, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_023', name: 'Unbreakable Netherite Hoe', category: 'tools', price_diamonds: 81.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_024', name: 'Unbreakable Diamond Axe', category: 'tools', price_diamonds: 144.00, trading_unit: 'per_item', stock_quantity: 0, owner_shop_name: 'Premium Tools & Weapons', is_available: false }),
+  mockItem({ id: 'item_025', name: 'Unbreakable Fishing Rod', category: 'tools', price_diamonds: 45.00, trading_unit: 'per_item', stock_quantity: 0, owner_shop_name: 'Premium Tools & Weapons', is_available: false }),
+  
+  // Armor
+  mockItem({ id: 'item_026', name: 'Champions Full Helm', category: 'armor', price_diamonds: 54.00, trading_unit: 'per_item', stock_quantity: 4, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_027', name: 'Mythical Full Helm', category: 'armor', price_diamonds: 81.00, trading_unit: 'per_item', stock_quantity: 3, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_028', name: 'Explorers Boots', category: 'armor', price_diamonds: 54.00, trading_unit: 'per_item', stock_quantity: 5, owner_shop_name: 'Ultimate Gear Shop' }),
+  
+  // Food & Consumables
+  mockItem({ id: 'item_029', name: 'Golden Apple', category: 'food', price_diamonds: 0.50, trading_unit: 'per_item', stock_quantity: 184, owner_shop_name: 'Nether Materials Co' }),
+  
+  // Miscellaneous & Special Items
+  mockItem({ id: 'item_030', name: 'Sorcerers Stone', category: 'misc', price_diamonds: 234.00, trading_unit: 'per_item', stock_quantity: 2, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_031', name: 'Totem of Undying', category: 'misc', price_diamonds: 90.00, trading_unit: 'per_item', stock_quantity: 3, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_032', name: 'Skeleton Horse Spawn Egg', category: 'misc', price_diamonds: 90.00, trading_unit: 'per_item', stock_quantity: 3, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_033', name: 'Zombie Horse Spawn Egg', category: 'misc', price_diamonds: 90.00, trading_unit: 'per_item', stock_quantity: 6, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_034', name: 'Bee Spawn Egg', category: 'misc', price_diamonds: 5.625, trading_unit: 'per_item', stock_quantity: 4, owner_shop_name: 'Ultimate Gear Shop' }),
+  
+  // Materials & Crafting
+  mockItem({ id: 'item_035', name: 'Amethyst Shards', category: 'misc', price_diamonds: 36.00, trading_unit: 'per_shulker', stock_quantity: 27, owner_shop_name: 'Wood & Amethyst Trader' }),
+  mockItem({ id: 'item_036', name: 'Netherite Upgrade Template', category: 'misc', price_diamonds: 6.00, trading_unit: 'per_item', stock_quantity: 167, owner_shop_name: 'Nether Materials Co' }),
+  mockItem({ id: 'item_037', name: 'Snout Armor Trim', category: 'misc', price_diamonds: 6.00, trading_unit: 'per_item', stock_quantity: 123, owner_shop_name: 'Nether Materials Co' }),
+  mockItem({ id: 'item_038', name: 'Rib Armor Trim', category: 'misc', price_diamonds: 6.00, trading_unit: 'per_item', stock_quantity: 54, owner_shop_name: 'Nether Materials Co' }),
+  mockItem({ id: 'item_039', name: 'Chains', category: 'misc', price_diamonds: 2, trading_unit: 'per_stack', stock_quantity: 0, owner_shop_name: 'Nether Materials Co', is_available: false }),
+  
+  // Enchanted Books
+  mockItem({ id: 'item_040', name: 'Mythical Tome', category: 'misc', price_diamonds: 18.00, trading_unit: 'per_item', stock_quantity: 6, owner_shop_name: 'Ultimate Gear Shop' }),
+  mockItem({ id: 'item_041', name: 'Soul Speed III Book', category: 'misc', price_diamonds: 8.00, trading_unit: 'per_item', stock_quantity: 44, owner_shop_name: 'Nether Materials Co' }),
+  mockItem({ id: 'item_042', name: 'Soul Speed II Book', category: 'misc', price_diamonds: 4.00, trading_unit: 'per_item', stock_quantity: 42, owner_shop_name: 'Nether Materials Co' }),
+  mockItem({ id: 'item_043', name: 'Soul Speed I Book', category: 'misc', price_diamonds: 2.00, trading_unit: 'per_item', stock_quantity: 48, owner_shop_name: 'Nether Materials Co' }),
+  
+  // Wood & Logs (from _Pythos692016)
+  mockItem({ id: 'item_044', name: 'Dark Oak Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 2, owner_shop_name: 'Wood & Amethyst Trader' }),
+  mockItem({ id: 'item_045', name: 'Pale Oak Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
+  mockItem({ id: 'item_046', name: 'Oak Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
+  mockItem({ id: 'item_047', name: 'Cherry Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
+  mockItem({ id: 'item_048', name: 'Spruce Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
+  mockItem({ id: 'item_049', name: 'Birch Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
+  mockItem({ id: 'item_050', name: 'Acacia Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
+  
+  // Special Items & Collectibles - including some lower-priced items for testing
+  mockItem({ id: 'item_051', name: 'Cobblestone', category: 'blocks', price_diamonds: 1.0, trading_unit: 'per_stack', stock_quantity: 100, owner_shop_name: 'General Trading Post' }),
+  mockItem({ id: 'item_052', name: 'Stone Bricks', category: 'blocks', price_diamonds: 1.5, trading_unit: 'per_stack', stock_quantity: 50, owner_shop_name: 'General Trading Post' }),
+  mockItem({ id: 'item_053', name: 'Cooked Beef', category: 'food', price_diamonds: 2.0, trading_unit: 'per_stack', stock_quantity: 25, owner_shop_name: 'General Trading Post' }),
+  mockItem({ id: 'item_054', name: 'Bread', category: 'food', price_diamonds: 3.0, trading_unit: 'per_stack', stock_quantity: 30, owner_shop_name: 'General Trading Post' }),
+  mockItem({ id: 'item_055', name: 'Glass', category: 'blocks', price_diamonds: 4.0, trading_unit: 'per_stack', stock_quantity: 40, owner_shop_name: 'General Trading Post' })
+];
+
+// Helper function to create handlers for both Docker and Dev environments
+const createPublicItemsHandler = (baseUrl: string) => {
+  return http.get(`${baseUrl}/api/data/public_items`, ({ request }) => {
+    const url = new URL(request.url);
+    
+    // Use realistic dataset - all 55 items from 7 shops
+    let items = [...REALISTIC_MARKETPLACE_DATA];
+    
+    // Handle PostgREST query patterns
+    const limit = url.searchParams.get('limit');
+    const offset = url.searchParams.get('offset') || '0';
+    const order = url.searchParams.get('order');
+    const select = url.searchParams.get('select');
+    
+    // Apply ordering
+    if (order === 'price_diamonds.desc') {
+      items.sort((a, b) => b.price_diamonds - a.price_diamonds);
+    } else if (order === 'name.asc') {
+      items.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    
+    // Apply pagination
+    const startIndex = parseInt(offset, 10);
+    const limitNum = limit ? parseInt(limit, 10) : items.length;
+    items = items.slice(startIndex, startIndex + limitNum);
+    
+    // Handle select (for counting queries)
+    if (select === 'id') {
+      return HttpResponse.json(items.map(item => ({ id: item.id })));
+    }
+    if (select === 'owner_shop_name') {
+      return HttpResponse.json(items.map(item => ({ owner_shop_name: item.owner_shop_name })));
+    }
+    if (select === 'category') {
+      return HttpResponse.json(items.map(item => ({ category: item.category })));
+    }
+    
+    return HttpResponse.json(items);
+  });
+};
+
 // EVERGREEN - PostgREST-style handlers
 export const postgrestHandlers = [
+  // GET /api/data/public_items - Enhanced endpoint for homepage pagination (both environments)
+  createPublicItemsHandler(DEV_BASE_URL),
+  createPublicItemsHandler(DOCKER_BASE_URL),
+
   // GET /api/data/items - Simplified endpoint for API service
   http.get(TEMPORAL_ENDPOINTS.itemsSimple, ({ request }) => {
     const url = new URL(request.url);
     
-    // Base test data with more variety
-    let items = [
-      mockItem({ name: 'Diamond Sword', category: 'weapons', server_name: 'HermitCraft', price_diamonds: 10 }),
-      mockItem({ id: 'item_456', name: 'Iron Sword', category: 'weapons', server_name: 'CreativeWorld', price_diamonds: 5 }),
-      mockItem({ id: 'item_789', name: 'Diamond Pickaxe', category: 'tools', server_name: 'TestServer', price_diamonds: 15 }),
-      mockItem({ id: 'item_101', name: 'Oak Wood', category: 'blocks', server_name: 'HermitCraft', price_diamonds: 1 }),
-      mockItem({ id: 'item_102', name: 'Stone Blocks', category: 'blocks', server_name: 'CreativeWorld', price_diamonds: 2 })
-    ];
+    // Use realistic dataset for consistency
+    let items = [...REALISTIC_MARKETPLACE_DATA];
     
     // Handle PostgREST query patterns
     for (const [key, value] of url.searchParams.entries()) {
@@ -97,31 +225,7 @@ export const postgrestHandlers = [
     return HttpResponse.json(listings);
   }),
 
-  // GET /api/data/public_items - List items with query support  
-  http.get(TEMPORAL_ENDPOINTS.items, ({ request }) => {
-    const url = new URL(request.url);
-    const limit = url.searchParams.get('limit');
-    const name = url.searchParams.get('name');
-    
-    let items = [
-      mockItem(),
-      mockItem({ id: 'item_456', name: 'Iron Sword', category: 'weapons' }),
-      mockItem({ id: 'item_789', name: 'Diamond Pickaxe', category: 'tools' })
-    ];
-    
-    // Filter by name if provided (PostgREST eq filter)
-    if (name && name.startsWith('eq.')) {
-      const searchName = name.replace('eq.', '');
-      items = items.filter(item => item.name === searchName);
-    }
-    
-    // Limit results if provided
-    if (limit) {
-      items = items.slice(0, parseInt(limit, 10));
-    }
-    
-    return HttpResponse.json(items);
-  }),
+  // Removed duplicate handler - using createPublicItemsHandler above instead
 
   // POST /api/data/public_items - Create item
   http.post(TEMPORAL_ENDPOINTS.items, async ({ request }) => {
@@ -162,7 +266,7 @@ export const postgrestHandlers = [
         price_diamonds: 5,
         trading_unit: 'per_item',
         stock_quantity: 3,
-        server_name: 'HermitCraft',
+        server_name: 'Safe Survival',
         shop_name: 'Test Shop',
         owner_username: 'TestUser',
         is_available: true,
@@ -175,7 +279,7 @@ export const postgrestHandlers = [
         price_diamonds: 0.5,
         trading_unit: 'per_stack',
         stock_quantity: 10,
-        server_name: 'CreativeWorld',
+        server_name: 'Safe Survival',
         shop_name: 'Wood Shop',
         owner_username: 'WoodTrader',
         is_available: true,
@@ -198,14 +302,6 @@ export const postgrestHandlers = [
 
 // EVERGREEN - Error response helpers
 export const postgrestErrorHandlers = [
-  // Simulate PostgREST 404 for non-existent items
-  http.get('/api/data/public_items', ({ request }) => {
-    const url = new URL(request.url);
-    if (url.searchParams.get('name') === 'eq.NonExistent') {
-      return HttpResponse.json([], { status: 200 }); // PostgREST returns empty array, not 404
-    }
-  }),
-
   // Simulate validation errors
   http.post('/api/data/public_items', async ({ request }) => {
     const body = await request.json() as any;
@@ -218,4 +314,4 @@ export const postgrestErrorHandlers = [
   })
 ];
 
-export { mockItem, mockUser };
+export { mockItem, mockUser, REALISTIC_MARKETPLACE_DATA };

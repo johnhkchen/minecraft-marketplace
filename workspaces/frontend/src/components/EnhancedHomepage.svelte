@@ -1,11 +1,32 @@
 <script lang="ts">
   import type { HomepageData } from '../lib/homepage-data.js';
+  import { loadHomepageData } from '../lib/homepage-data.js';
   
   interface Props {
     homepageData?: HomepageData;
   }
   
   let { homepageData }: Props = $props();
+  let currentData = $state(homepageData);
+  let loading = $state(false);
+  
+  async function navigateToPage(page: number) {
+    if (loading || page === currentData?.pagination.currentPage) return;
+    
+    loading = true;
+    try {
+      // Load new data without any scrolling animation
+      const newData = await loadHomepageData(page);
+      currentData = newData;
+    } catch (error) {
+      console.error('Failed to load page:', error);
+    } finally {
+      loading = false;
+    }
+  }
+  
+  // Use currentData with fallback to original homepageData
+  const displayData = $derived(currentData || homepageData);
 </script>
 
 <div class="minecraft-marketplace">
@@ -21,18 +42,18 @@
       </button>
     </div>
     
-    {#if homepageData}
+    {#if displayData}
       <div class="market-summary">
         <p class="market-status">
-          <span class="highlight">{homepageData.marketStats.totalItems}</span> items for sale from 
-          <span class="highlight">{homepageData.marketStats.activeShops}</span> shops
+          <span class="highlight">{displayData.marketStats.totalItems}</span> items for sale from 
+          <span class="highlight">{displayData.marketStats.activeShops}</span> shops
         </p>
       </div>
       
       <div class="market-overview">
         <h3>🌟 Featured Items</h3>
         <div class="market-items">
-          {#each homepageData.featuredItems.slice(0, 4) as item}
+          {#each displayData.featuredItems as item}
             <div class="market-item">
               <span class="item-name">{item.name}</span>
               <span class="category-badge">{item.category}</span>
@@ -43,6 +64,85 @@
               </span>
             </div>
           {/each}
+        </div>
+      </div>
+
+      <!-- All Items with Pagination -->
+      <div class="all-items-section">
+        <h3>📦 All Marketplace Items</h3>
+        <div class="pagination-info">
+          <p data-testid="current-page">Showing {displayData.allItems.length} of {displayData.pagination.totalItems} items 
+             (Page {displayData.pagination.currentPage} of {displayData.pagination.totalPages})</p>
+        </div>
+        
+        {#if loading}
+          <div class="loading-overlay">
+            <p>🔄 Loading items...</p>
+          </div>
+        {/if}
+        
+        <div class="items-grid" class:loading={loading}>
+          {#each displayData.allItems as item}
+            <div class="item-card">
+              <div class="item-header">
+                <span class="item-name">{item.name}</span>
+                <span class="category-badge">{item.category}</span>
+              </div>
+              <div class="item-details">
+                <p class="item-description">{item.description}</p>
+                <div class="item-info">
+                  <span class="price-display">{item.priceDisplay}</span>
+                </div>
+                <div class="shop-info">
+                  <span class="shop-name">{item.shopName}</span>
+                  <span class="stock-info">{item.stockQuantity} in stock</span>
+                </div>
+              </div>
+            </div>
+          {/each}
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls">
+          {#if displayData.pagination.currentPage > 1}
+            <button 
+              class="pagination-btn" 
+              disabled={loading}
+              onclick={(e) => {
+                e.preventDefault();
+                navigateToPage(displayData.pagination.currentPage - 1);
+              }}
+            >
+              {loading ? '⏳' : '←'} Previous
+            </button>
+          {/if}
+          
+          {#each Array(Math.min(5, displayData.pagination.totalPages)) as _, i}
+            {@const pageNum = i + 1}
+            <button 
+              class="pagination-btn {pageNum === displayData.pagination.currentPage ? 'active' : ''}"
+              disabled={loading || pageNum === displayData.pagination.currentPage}
+              onclick={(e) => {
+                e.preventDefault();
+                navigateToPage(pageNum);
+              }}
+            >
+              {pageNum}
+            </button>
+          {/each}
+          
+          {#if displayData.pagination.currentPage < displayData.pagination.totalPages}
+            <button 
+              class="pagination-btn" 
+              disabled={loading}
+              onclick={(e) => {
+                e.preventDefault();
+                navigateToPage(displayData.pagination.currentPage + 1);
+              }}
+            >
+              Next {loading ? '⏳' : '→'}
+            </button>
+          {/if}
         </div>
       </div>
     {:else}
@@ -291,6 +391,155 @@
     color: #ffd700;
   }
   
+  /* All Items Section */
+  .all-items-section {
+    margin: 3rem 0;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 2rem;
+  }
+
+  .all-items-section h3 {
+    margin: 0 0 1.5rem 0;
+    color: #ffd700;
+    font-size: 1.3rem;
+    text-align: center;
+  }
+
+  .pagination-info {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #cccccc;
+    font-size: 0.9rem;
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .item-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1.2rem;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .item-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 215, 0, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+  }
+
+  .item-card .item-name {
+    font-weight: bold;
+    color: #ffd700;
+    font-size: 1.1rem;
+  }
+
+  .item-description {
+    color: #cccccc;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    line-height: 1.4;
+  }
+
+  .item-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.8rem 0;
+  }
+
+
+  .shop-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  /* Pagination Controls */
+  .pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .pagination-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: #cccccc;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+  }
+
+  .pagination-btn:hover {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+    border-color: rgba(255, 215, 0, 0.6);
+  }
+
+  .pagination-btn.active {
+    background: rgba(255, 215, 0, 0.3);
+    color: #ffd700;
+    border-color: #ffd700;
+    font-weight: bold;
+  }
+
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .loading-overlay {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    margin: 1rem 0;
+  }
+
+  .loading-overlay p {
+    color: #ffd700;
+    font-size: 1.1rem;
+    margin: 0;
+  }
+
+  .items-grid {
+    transition: opacity 0.15s ease;
+  }
+
+  .items-grid.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .pagination-controls {
+    transition: opacity 0.15s ease;
+  }
+
+  .pagination-controls:has(.pagination-btn:disabled) {
+    opacity: 0.8;
+  }
+
   @media (max-width: 768px) {
     .quick-actions {
       flex-direction: column;
@@ -314,6 +563,24 @@
     
     h1 {
       font-size: 2rem;
+    }
+
+    .items-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .item-info {
+      justify-content: flex-start;
+    }
+
+    .pagination-controls {
+      gap: 0.3rem;
+    }
+
+    .pagination-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
     }
   }
 </style>

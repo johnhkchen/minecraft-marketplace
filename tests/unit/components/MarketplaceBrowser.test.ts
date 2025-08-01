@@ -77,7 +77,7 @@ describe('MarketplaceBrowser API Integration Logic - Fast Tests', () => {
       
       // Validate search results contain search term (Minecraft items)
       const hasSearchTerm = result.some(item => 
-        item.item_name?.toLowerCase().includes('diamond')
+        item.name?.toLowerCase().includes('diamond')
       );
       expect(hasSearchTerm).toBe(true);
       

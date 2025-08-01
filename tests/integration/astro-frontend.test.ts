@@ -34,7 +34,7 @@ describe('Astro SSR Frontend - GAMEPLAN Integration', () => {
               id: '1',
               name: 'Diamond Sword',
               category: 'tools',
-              server_name: 'TestServer',
+              server_name: 'Safe Survival',
               is_available: true,
               stock_quantity: 5,
               updated_at: new Date().toISOString(),
@@ -47,7 +47,7 @@ describe('Astro SSR Frontend - GAMEPLAN Integration', () => {
               id: '2', 
               name: 'Iron Pickaxe',
               category: 'tools',
-              server_name: 'TestServer',
+              server_name: 'Safe Survival',
               is_available: true,
               stock_quantity: 10,
               updated_at: new Date().toISOString(),
@@ -259,7 +259,7 @@ describe('PostgREST Integration', () => {
       const filters = {
         category: 'tools',
         maxPrice: 5,
-        server: 'TestServer'
+        server: 'Safe Survival'
       };
 
       // Simulate PostgREST query building
@@ -323,7 +323,7 @@ describe('Foundation-First Architecture Validation', () => {
         id: 'test-id',
         name: 'Test Item',
         category: 'tools' as const,
-        server_name: 'TestServer',
+        server_name: 'Safe Survival',
         is_available: true,
         stock_quantity: 10,
         prices: [{

@@ -1,0 +1,5 @@
+-- Seed Data for Minecraft Marketplace
+-- 
+-- This file loads real marketplace data from actual server transactions
+-- Content from 002_real_marketplace_data.sql is processed separately by PostgreSQL
+-- in alphabetical order after this file

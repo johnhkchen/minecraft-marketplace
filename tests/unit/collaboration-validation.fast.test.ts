@@ -149,7 +149,7 @@ describe('Requirement 2: Working Demo Others Can Access', () => {
     expectFastExecution(timeMs, 10);
     expect(searchTest.resultsFound).toBe(true);
     expect(searchTest.responseTime).toBeLessThan(2000); // Epic 1 requirement
-    expect(searchTest.sellerName).toBe('steve');
+    expect(searchTest.sellerName).toBe(MINECRAFT_TEST_DATA.users.mainTrader);
   });
 });
 

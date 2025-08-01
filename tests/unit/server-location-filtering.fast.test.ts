@@ -14,9 +14,9 @@ setupFastTests();
 // CONFIGURABLE - Minecraft server and location test data (matching MSW mock data)
 const TEST_DATA = {
   // Minecraft server names (matching MSW handlers)
-  primaryServer: 'HermitCraft',
-  secondaryServer: 'CreativeWorld', // Changed to match MSW mock data
-  creativeServer: 'HermitCraft',
+  primaryServer: 'Safe Survival',
+  secondaryServer: 'Safe Survival', // Changed to match MSW mock data
+  creativeServer: 'Safe Survival',
   // Shop locations
   marketDistrict: 'spawn_market', // Changed to match MSW mock data
   spawnShops: 'spawn_market',
@@ -107,7 +107,7 @@ describe('Epic 1: Price Discovery - Server and Location Filtering - Fast Tests',
       // Validate unique server names structure (MSW now properly handles distinct query)
       const uniqueServers = new Set(servers);
       expect(uniqueServers.size).toBe(servers.length); // Should have no duplicates
-      expect(servers.length).toBe(2); // Should match MSW mock data (HermitCraft, CreativeWorld)
+      expect(servers.length).toBe(1); // Should match MSW mock data (Safe Survival only)
       
       // Should contain realistic Minecraft server names
       servers.forEach(server => {

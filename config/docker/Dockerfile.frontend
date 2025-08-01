@@ -37,28 +37,27 @@ RUN npm run build
 WORKDIR /app/workspaces/frontend
 RUN npm run build
 
-# Production image
-FROM base AS runner
+# Production image - Following Astro's official Docker recommendations
+FROM node:lts AS runtime
 WORKDIR /app
+
+# Copy the entire built project
+COPY --from=builder /app/workspaces/frontend/dist ./dist
+COPY --from=builder /app/workspaces/frontend/package*.json ./
+COPY --from=builder /app/workspaces/shared ./shared
+
+# Install only production dependencies for runtime
+RUN npm install --omit=dev
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 astro
 
-# Copy built application
-COPY --from=builder --chown=astro:nodejs /app/workspaces/frontend/dist ./dist
-COPY --from=builder --chown=astro:nodejs /app/workspaces/frontend/package*.json ./
-COPY --from=deps --chown=astro:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=astro:nodejs /app/workspaces/shared ./shared
-
-# Copy necessary configuration files
-COPY --from=builder --chown=astro:nodejs /app/workspaces/frontend/astro.config.mjs ./astro.config.mjs
-
-# Create upload directories
+# Create upload directories and set ownership
 RUN mkdir -p uploads/evidence && \
-    chown -R astro:nodejs uploads
+    chown -R astro:nodejs /app
 
-# Set environment variables
+# Set environment variables per Astro documentation
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=4321
@@ -71,7 +70,7 @@ USER astro
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:4321/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
+  CMD node -e "require('http').get('http://localhost:4321', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
 
-# Start the application
+# Start the application using Astro's recommended command
 CMD ["node", "./dist/server/entry.mjs"]

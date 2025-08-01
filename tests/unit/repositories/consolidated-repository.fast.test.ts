@@ -116,7 +116,7 @@ describe('Repository Layer - Consolidated Fast Tests', () => {
       
       // Create shop owner
       const owner = await userRepository.create({
-        discordId: MINECRAFT_TEST_DATA.discordIds.steve,
+        discordId: MINECRAFT_TEST_DATA.discordIds[scenario.owner],
         username: scenario.owner,
         shopName: scenario.shop,
         role: 'shop_owner',
@@ -210,16 +210,16 @@ describe('Repository Layer - Consolidated Fast Tests', () => {
         const start = performance.now();
         
         const userData = {
-          discordId: MINECRAFT_TEST_DATA.discordIds.alex,
+          discordId: MINECRAFT_TEST_DATA.discordIds[MINECRAFT_TEST_DATA.users.altTrader],
           username: MINECRAFT_TEST_DATA.users.altTrader,
-          shopName: MINECRAFT_TEST_DATA.shops.alex_iron_works,
+          shopName: MINECRAFT_TEST_DATA.shops.premium_tools,
           role: 'shop_owner' as const,
           isActive: true
         };
         
         const user = await userRepository.create(userData);
         expect(user.username).toBe(MINECRAFT_TEST_DATA.users.altTrader);
-        expect(user.discordId).toBe(MINECRAFT_TEST_DATA.discordIds.alex);
+        expect(user.discordId).toBe(MINECRAFT_TEST_DATA.discordIds[MINECRAFT_TEST_DATA.users.altTrader]);
         
         const timeMs = performance.now() - start;
         expectFastExecution(timeMs, 10);
@@ -261,12 +261,12 @@ describe('Repository Layer - Consolidated Fast Tests', () => {
       const start = performance.now();
       for (const unit of tradingUnits) {
         const price = await priceRepository.create({
-          itemId: MINECRAFT_TEST_DATA.items.diamond_block,
+          itemId: `test_item_${unit}`,
           priceDiamonds: 9.0,
           tradingUnit: unit,
           isCurrent: true,
           source: 'owner',
-          createdBy: MINECRAFT_TEST_DATA.users.adminUser
+          createdBy: MINECRAFT_TEST_DATA.users.mainTrader
         });
         
         expect(price.tradingUnit).toBe(unit);

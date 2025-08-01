@@ -3,10 +3,21 @@ import Layout from '../layouts/BaseLayout.astro';
 import EnhancedHomepage from '../components/EnhancedHomepage.svelte';
 import { loadHomepageData } from '../lib/homepage-data.js';
 
-// Load homepage data server-side
-const homepageData = await loadHomepageData();
+// Get page parameter from URL
+const url = new URL(Astro.request.url);
+const pageParam = url.searchParams.get('page');
+const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
+
+// Validate page parameter
+const validatedPage = isNaN(currentPage) || currentPage < 1 ? 1 : currentPage;
+
+// Load homepage data server-side with cache busting
+console.log('🔄 SSR: Loading homepage data at', new Date().toISOString(), 'for page', validatedPage);
+const homepageData = await loadHomepageData(validatedPage);
+console.log('📊 SSR: Loaded', homepageData.marketStats.totalItems, 'items from', homepageData.marketStats.activeShops, 'shops');
 ---
 
 <Layout title="Minecraft Item Marketplace - Buy & Sell Minecraft Items">
+	<!-- SSR Debug: Generated at {new Date().toISOString()} with {homepageData.marketStats.totalItems} items from {homepageData.marketStats.activeShops} shops -->
 	<EnhancedHomepage client:load homepageData={homepageData} />
 </Layout>

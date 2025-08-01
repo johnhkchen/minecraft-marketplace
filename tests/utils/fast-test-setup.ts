@@ -13,6 +13,7 @@ import './auto-environment-guard.js'; // Auto-activate environment protection fo
 // CONFIGURABLE - Update endpoints for your project
 const TEST_ENDPOINTS = {
   items: 'http://localhost:3000/api/data/public_items',
+  itemsDocker: 'http://localhost:7410/api/data/public_items', // Docker environment
   users: 'http://localhost:3000/api/data/public_users', 
   reports: 'http://localhost:3000/api/data/public_community_reports',
   prices: 'http://localhost:3000/api/data/public_prices',
@@ -31,7 +32,7 @@ const TEST_DATA = {
   reportId: '789',
   shopName: 'Steve\'s Diamond Shop',
   itemName: 'Diamond Sword',
-  serverId: 'HermitCraft'
+  serverId: 'Safe Survival'
 };
 
 // Performance measurement utility (evolved from search-performance.evolved.test.ts)
@@ -127,12 +128,18 @@ export const fastReport = (overrides = {}) => ({
   ...overrides
 });
 
-// Fast API handlers - respond instantly with no network calls
-const fastHandlers = [
-  // Items API with filtering support
-  http.get(TEST_ENDPOINTS.items, ({ request }) => {
+// Import realistic dataset from postgrest-handlers
+import { REALISTIC_MARKETPLACE_DATA } from '../mocks/postgrest-handlers.js';
+
+// Helper function to create items handler for any URL
+const createItemsHandler = (endpoint: string) => {
+  return http.get(endpoint, ({ request }) => {
     const url = new URL(request.url);
     const limit = url.searchParams.get('limit');
+    const offset = url.searchParams.get('offset') || '0';
+    const order = url.searchParams.get('order');
+    const select = url.searchParams.get('select');
+    
     // Handle PostgREST ilike search: name=ilike.*diamond*
     const nameIlike = url.searchParams.get('name');
     const search = nameIlike?.startsWith('ilike.') ? 
@@ -140,38 +147,34 @@ const fastHandlers = [
       nameIlike?.toLowerCase();
     const category = url.searchParams.get('category')?.replace('eq.', '');
     const serverName = url.searchParams.get('server_name')?.replace('eq.', '');
-    const minPrice = url.searchParams.get('price_diamonds')?.match(/gte\.(\d+\.?\d*)/)?.[1];
-    const maxPrice = url.searchParams.get('price_diamonds')?.match(/lte\.(\d+\.?\d*)/)?.[1];
     
-    let items = [
-      fastItem(), 
-      fastItem({ 
-        id: '457', 
-        name: 'Iron Sword', 
-        minecraft_id: 'minecraft:iron_sword',
-        owner_id: 'alex',
-        owner_username: 'alex',
-        category: 'weapons',
-        price_diamonds: 1.5,
-        server_name: 'CreativeWorld'
-      }),
-      fastItem({ 
-        id: '458', 
-        name: 'Diamond Pickaxe', 
-        minecraft_id: 'minecraft:diamond_pickaxe',
-        owner_id: 'notch',
-        owner_username: 'notch',
-        category: 'tools',
-        price_diamonds: 4.0,
-        server_name: TEST_DATA.serverId
-      })
-    ];
+    // Handle multiple price_diamonds parameters correctly
+    let minPrice, maxPrice;
+    const priceParams = url.searchParams.getAll('price_diamonds');
+    for (const priceParam of priceParams) {
+      if (priceParam.startsWith('gte.')) {
+        minPrice = priceParam.match(/gte\.(\d+\.?\d*)/)?.[1];
+      }
+      if (priceParam.startsWith('lte.')) {
+        maxPrice = priceParam.match(/lte\.(\d+\.?\d*)/)?.[1];
+      }
+    }
+    
+    // Use realistic dataset - all 55 items from 7 shops
+    let items = [...REALISTIC_MARKETPLACE_DATA];
+    
+    // Apply ordering
+    if (order === 'price_diamonds.desc') {
+      items.sort((a, b) => b.price_diamonds - a.price_diamonds);
+    } else if (order === 'name.asc') {
+      items.sort((a, b) => a.name.localeCompare(b.name));
+    }
     
     // Apply filters
     if (search) {
       items = items.filter(item => 
         item.name.toLowerCase().includes(search) ||
-        item.minecraft_id.toLowerCase().includes(search)
+        item.minecraft_id?.toLowerCase().includes(search)
       );
     }
     if (category) {
@@ -187,9 +190,31 @@ const fastHandlers = [
       items = items.filter(item => item.price_diamonds <= parseFloat(maxPrice));
     }
     
-    if (limit) items = items.slice(0, parseInt(limit, 10));
+    // Apply pagination
+    const startIndex = parseInt(offset, 10);
+    const limitNum = limit ? parseInt(limit, 10) : items.length;
+    items = items.slice(startIndex, startIndex + limitNum);
+    
+    // Handle select (for counting queries)
+    if (select === 'id') {
+      return HttpResponse.json(items.map(item => ({ id: item.id })));
+    }
+    if (select === 'owner_shop_name') {
+      return HttpResponse.json(items.map(item => ({ owner_shop_name: item.owner_shop_name })));
+    }
+    if (select === 'category') {
+      return HttpResponse.json(items.map(item => ({ category: item.category })));
+    }
+    
     return HttpResponse.json(items);
-  }),
+  });
+};
+
+// Fast API handlers - respond instantly with no network calls
+const fastHandlers = [
+  // Items API with filtering support (both development and docker environments)
+  createItemsHandler(TEST_ENDPOINTS.items),
+  createItemsHandler(TEST_ENDPOINTS.itemsDocker),
 
   http.post(TEST_ENDPOINTS.items, async ({ request }) => {
     const body = await request.json() as any;
@@ -292,7 +317,7 @@ const fastHandlers = [
         trading_unit: 'per_stack',
         qty: 10,
         stock_quantity: 10,
-        server_name: 'CreativeWorld',
+        server_name: 'Safe Survival',
         shop_name: 'Wood Shop',
         is_active: true,
         date_created: '2025-01-01T01:00:00Z'
@@ -318,29 +343,21 @@ const fastHandlers = [
     const nameFilter = url.searchParams.get('name');
     const categoryFilter = url.searchParams.get('category');
     const serverFilter = url.searchParams.get('server_name');
-    const minPrice = url.searchParams.get('price_diamonds')?.match(/gte\.(\d+\.?\d*)/)?.[1];
-    const maxPrice = url.searchParams.get('price_diamonds')?.match(/lte\.(\d+\.?\d*)/)?.[1];
     
-    // Use existing fast test items
-    let items = [
-      fastItem(),
-      fastItem({ 
-        id: '457', 
-        name: 'Iron Sword', 
-        minecraft_id: 'minecraft:iron_sword',
-        category: 'weapons',
-        price_diamonds: 1.5,
-        server_name: 'CreativeWorld'
-      }),
-      fastItem({ 
-        id: '458', 
-        name: 'Oak Wood', 
-        minecraft_id: 'minecraft:oak_wood',
-        category: 'blocks',
-        price_diamonds: 0.5,
-        server_name: 'CreativeWorld'
-      })
-    ];
+    // Handle multiple price_diamonds parameters correctly
+    let minPrice, maxPrice;
+    const priceParams = url.searchParams.getAll('price_diamonds');
+    for (const priceParam of priceParams) {
+      if (priceParam.startsWith('gte.')) {
+        minPrice = priceParam.match(/gte\.(\d+\.?\d*)/)?.[1];
+      }
+      if (priceParam.startsWith('lte.')) {
+        maxPrice = priceParam.match(/lte\.(\d+\.?\d*)/)?.[1];
+      }
+    }
+    
+    // Use realistic dataset - all 55 items from 7 shops
+    let items = [...REALISTIC_MARKETPLACE_DATA];
     
     // Apply filters
     if (nameFilter && nameFilter.includes('ilike')) {

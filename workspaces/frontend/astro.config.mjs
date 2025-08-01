@@ -7,6 +7,7 @@ export default defineConfig({
   output: 'server',
   adapter: node({
     mode: 'standalone'
+    // Note: Using standalone mode as recommended for Docker deployments
   }),
   integrations: [svelte()],
   server: {

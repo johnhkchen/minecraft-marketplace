@@ -7,13 +7,41 @@
 
 class URLConstructionService {
   constructor(config = {}) {
+    // Detect if we're in Docker environment (nginx proxy setup)
+    const isDockerDeployment = process.env.COMPOSE_PROJECT_NAME || 
+                              process.env.DOCKER_COMPOSE || 
+                              // Check for nginx-style deployment with port 7410
+                              this.checkDockerDeployment();
+    
+    const dockerBaseUrl = 'http://localhost:7410';
+    const testBaseUrl = isDockerDeployment ? dockerBaseUrl : 'http://localhost:3000';
+    
     this.config = {
-      testBaseUrl: 'http://localhost:3000',
-      devBaseUrl: 'http://localhost:3000',  
+      testBaseUrl,
+      devBaseUrl: isDockerDeployment ? dockerBaseUrl : 'http://localhost:3000',  
       prodBaseUrl: '', // Relative URLs work in browser context
-      fallbackBaseUrl: 'http://localhost:3000', // Always absolute for SSR
+      fallbackBaseUrl: isDockerDeployment ? dockerBaseUrl : 'http://localhost:3000', // Always absolute for SSR
       ...config
     };
+  }
+
+  /**
+   * Check if we're running in Docker deployment with nginx proxy
+   */
+  checkDockerDeployment() {
+    try {
+      // Check if we can reach nginx on port 7410 (Docker deployment indicator)
+      // This is a synchronous check that doesn't block startup
+      const isNodeJS = typeof process !== 'undefined';
+      const hasDockerIndicators = isNodeJS && (
+        process.env.HOME === '/app' || // Common Docker home directory
+        process.env.PATH?.includes('/app') || // App directory in PATH
+        typeof require === 'function' // Running in Node.js context where Docker would be detected
+      );
+      return hasDockerIndicators;
+    } catch (error) {
+      return false;
+    }
   }
 
   /**

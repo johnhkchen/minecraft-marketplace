@@ -8,7 +8,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 // Mock data generator for realistic Minecraft items
 function generateMockItems(count: number) {
   const categories = ['tools', 'armor', 'blocks', 'food', 'misc'];
-  const servers = ['SurvivalServer', 'CreativeWorld', 'SkyblockRealm', 'FactionsWar'];
+  const servers = ['SurvivalServer', 'Safe Survival', 'SkyblockRealm', 'FactionsWar'];
   const itemNames = [
     'Diamond Sword', 'Iron Pickaxe', 'Enchanted Book', 'Golden Apple',
     'Netherite Helmet', 'Shulker Box', 'Elytra', 'Totem of Undying',

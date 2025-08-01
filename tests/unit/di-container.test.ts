@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { ServiceContainer } from "@shared/di/container";
+import { ServiceContainer } from "../../workspaces/shared/di/container.js";
 import { measure, expectFastExecution } from "../utils/fast-test-setup";
 
 // CONFIGURABLE - Update for your project

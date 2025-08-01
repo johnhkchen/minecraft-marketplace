@@ -130,9 +130,9 @@ describe('Requirement 2: Working Demo Accessible to Others', () => {
     try {
       const frameworkContent = await readFile(frameworkPath, 'utf-8');
       
-      // Check for minecraft domain modeling
-      expect(frameworkContent).toContain('steve');
-      expect(frameworkContent).toContain('alex');
+      // Check for real marketplace data patterns from actual server
+      expect(frameworkContent).toContain('seller3');
+      expect(frameworkContent).toContain('Hikoo');
       expect(frameworkContent).toContain('diamond_sword');
       expect(frameworkContent).toContain('HermitCraft');
       

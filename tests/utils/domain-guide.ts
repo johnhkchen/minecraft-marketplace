@@ -196,9 +196,9 @@ export const MINECRAFT_DOMAIN_GUIDE = {
       }
     },
     servers: {
-      primary: 'HermitCraft',
-      secondary: 'CreativeWorld',
-      test: 'TestServer'
+      primary: 'Safe Survival',
+      secondary: 'Safe Survival',
+      test: 'Safe Survival'
     },
     locations: {
       spawn: 'spawn_market',

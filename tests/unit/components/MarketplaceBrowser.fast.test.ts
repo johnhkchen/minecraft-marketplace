@@ -185,7 +185,7 @@ describe('MarketplaceBrowser API Integration Logic - Fast Tests', () => {
     });
 
     test('filters items by server', async () => {
-      const serverName = 'TestServer';
+      const serverName = 'Safe Survival';
       
       const { result, timeMs } = await measure(async () => {
         return apiService.filterByServer(serverName);

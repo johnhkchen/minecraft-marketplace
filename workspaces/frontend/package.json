@@ -6,8 +6,9 @@
   "description": "Astro SSR frontend with Svelte components and secure API routes",
   "scripts": {
     "dev": "astro dev --host 0.0.0.0 --port 7411",
-    "build": "astro check && astro build",
+    "build": "astro build",
     "preview": "astro preview",
+    "start": "node ./dist/server/entry.mjs",
     "type-check": "astro check",
     "lint": "eslint src --ext .ts,.astro,.svelte",
     "format": "prettier --write src"

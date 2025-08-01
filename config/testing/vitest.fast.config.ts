@@ -22,7 +22,8 @@ export default defineConfig(
         'tests/unit/**/*.fast.test.ts',
         'tests/unit/temporal-decoupling.test.ts',
         'tests/unit/discord-integration.consolidated.fast.test.ts', 
-        'tests/unit/community-reporting.consolidated.fast.test.ts'
+        'tests/unit/community-reporting.consolidated.fast.test.ts',
+        'tests/validation/**/*.test.ts'
       ],
       exclude: [
         'tests/integration/**',

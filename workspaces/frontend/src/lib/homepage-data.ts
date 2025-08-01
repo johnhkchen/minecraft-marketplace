@@ -5,7 +5,7 @@
 
 import { formatPrice } from '../../../shared/utils/price-display.js';
 import { MarketplaceApiService } from './api/marketplace.js';
-import { URLConstructionService } from '../../../../shared/services/url-construction-service.js';
+import { URLConstructionService } from './url-construction.js';
 
 export interface HomepageData {
   featuredItems: MarketplaceItem[];
@@ -67,7 +67,7 @@ export async function loadHomepageData(page: number = 1, itemsPerPage: number = 
     
     // Fetch all items for pagination (price sorting)
     // Use URLConstructionService for environment-safe URL construction
-    const itemsUrl = urlService.buildApiUrl(`/api/data/public_items?limit=${itemsPerPage}&offset=${offset}&order=price_diamonds.desc`);
+    const itemsUrl = urlService.buildApiUrl(`/public_items?limit=${itemsPerPage}&offset=${offset}&order=price_diamonds.desc`);
     const response = await fetch(itemsUrl);
     if (!response.ok) {
       throw new Error(`API request failed: ${response.statusText}`);
@@ -92,13 +92,13 @@ export async function loadHomepageData(page: number = 1, itemsPerPage: number = 
     const allItems: MarketplaceItem[] = rawItems.map(transformItem);
     
     // Get featured items (top 6 highest priced items)
-    const featuredUrl = urlService.buildApiUrl('/api/data/public_items?limit=6&order=price_diamonds.desc');
+    const featuredUrl = urlService.buildApiUrl('/public_items?limit=6&order=price_diamonds.desc');
     const featuredResponse = await fetch(featuredUrl);
     const featuredRaw = featuredResponse.ok ? await featuredResponse.json() : rawItems.slice(0, 6);
     const featuredItems: MarketplaceItem[] = featuredRaw.slice(0, 6).map(transformItem);
 
     // Count total items for pagination
-    const totalItemsUrl = urlService.buildApiUrl('/api/data/public_items?select=id');
+    const totalItemsUrl = urlService.buildApiUrl('/public_items?select=id');
     const totalItemsResponse = await fetch(totalItemsUrl);
     const totalItemsCount = totalItemsResponse.ok ? (await totalItemsResponse.json()).length : 0;
     
@@ -112,7 +112,7 @@ export async function loadHomepageData(page: number = 1, itemsPerPage: number = 
     };
     
     // Get unique shop count
-    const shopsUrl = urlService.buildApiUrl('/api/data/public_items?select=owner_shop_name');
+    const shopsUrl = urlService.buildApiUrl('/public_items?select=owner_shop_name');
     const shopsResponse = await fetch(shopsUrl);
     const uniqueShops = shopsResponse.ok ? 
       new Set((await shopsResponse.json()).map((item: any) => item.owner_shop_name).filter(Boolean)).size : 0;
@@ -124,7 +124,7 @@ export async function loadHomepageData(page: number = 1, itemsPerPage: number = 
     };
 
     // Group items by category
-    const categoriesUrl = urlService.buildApiUrl('/api/data/public_items?select=category');
+    const categoriesUrl = urlService.buildApiUrl('/public_items?select=category');
     const categoriesResponse = await fetch(categoriesUrl);
     const categoryData = categoriesResponse.ok ? await categoriesResponse.json() : [];
     const categoryCounts = categoryData.reduce((acc: any, item: any) => {

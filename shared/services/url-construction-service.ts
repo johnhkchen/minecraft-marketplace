@@ -23,11 +23,14 @@ export class URLConstructionService {
   private config: URLConstructionConfig;
 
   constructor(config?: Partial<URLConstructionConfig>) {
+    // Detect if we're running inside Docker container
+    const isDockerEnvironment = this.isRunningInDocker();
+    
     this.config = {
       testBaseUrl: 'http://localhost:3000',
-      devBaseUrl: 'http://localhost:3000',
+      devBaseUrl: 'http://localhost:3000', 
       prodBaseUrl: '', // Relative URLs work in browser context
-      fallbackBaseUrl: 'http://localhost:3000', // Always absolute for SSR
+      fallbackBaseUrl: isDockerEnvironment ? 'http://postgrest:3000' : 'http://localhost:7410',
       ...config
     };
   }
@@ -111,6 +114,19 @@ export class URLConstructionService {
     } catch (error) {
       throw new Error(`Invalid URL construction: ${url} - ${error.message}`);
     }
+  }
+
+  /**
+   * Detect if running inside Docker container
+   */
+  private isRunningInDocker(): boolean {
+    // Check for Docker environment indicators
+    return !!(
+      process.env.HOSTNAME || // Docker containers have hostname
+      process.env.POSTGRES_HOST === 'db' || // Our Docker compose setup
+      process.env.VALKEY_HOST === 'valkey' || // Our Docker compose setup
+      process.env.HOME === '/home/astro' // Our Docker container user
+    );
   }
 
   /**
