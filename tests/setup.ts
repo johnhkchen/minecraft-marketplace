@@ -1,6 +1,7 @@
 import { beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { setupInfrastructureOrSkip, type TestEnvironment } from './utils/test-environment.js';
 import { isDockerAvailable } from './utils/testcontainers-setup.js';
+import './utils/auto-environment-guard.js'; // Auto-activate environment protection
 
 // Test configuration using nginx proxy (single entry point)
 const NGINX_BASE_URL = process.env.NGINX_BASE_URL || 'http://localhost:7410';

@@ -8,6 +8,7 @@
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 import { beforeAll, afterEach, afterAll, expect } from 'vitest';
+import './auto-environment-guard.js'; // Auto-activate environment protection for fast tests
 
 // CONFIGURABLE - Update endpoints for your project
 const TEST_ENDPOINTS = {
