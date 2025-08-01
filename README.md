@@ -248,7 +248,7 @@ npm run type-check        # TypeScript validation
 
 ## 📄 **License**
 
-[Add appropriate license]
+MIT
 
 ---
 
