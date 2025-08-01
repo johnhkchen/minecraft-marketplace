@@ -9,8 +9,8 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY backend/package*.json ./backend/
-COPY shared/package.json ./shared/
+COPY workspaces/backend/package*.json ./workspaces/backend/
+COPY workspaces/shared/package.json ./workspaces/shared/
 
 # Install dependencies
 RUN npm ci --only=production && npm cache clean --force
@@ -21,19 +21,19 @@ WORKDIR /app
 
 # Copy package files and source code
 COPY package*.json ./
-COPY tsconfig.json ./
-COPY backend/ ./backend/
-COPY shared/ ./shared/
+COPY config/typescript/tsconfig.json ./tsconfig.json
+COPY workspaces/backend/ ./workspaces/backend/
+COPY workspaces/shared/ ./workspaces/shared/
 
 # Install all dependencies (including dev dependencies for build)
 RUN npm ci
 
 # Build shared module first
-WORKDIR /app/shared
+WORKDIR /app/workspaces/shared
 RUN npm run build
 
 # Build the backend application
-WORKDIR /app/backend
+WORKDIR /app/workspaces/backend
 RUN npm run build
 
 # Production image
@@ -45,10 +45,10 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 hono
 
 # Copy built application
-COPY --from=builder --chown=hono:nodejs /app/backend/dist ./dist
-COPY --from=builder --chown=hono:nodejs /app/backend/package*.json ./
+COPY --from=builder --chown=hono:nodejs /app/workspaces/backend/dist ./dist
+COPY --from=builder --chown=hono:nodejs /app/workspaces/backend/package*.json ./
 COPY --from=deps --chown=hono:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=hono:nodejs /app/shared ./shared
+COPY --from=builder --chown=hono:nodejs /app/workspaces/shared ./shared
 
 # Set environment variables
 ENV NODE_ENV=production

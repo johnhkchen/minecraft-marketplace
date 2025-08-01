@@ -9,8 +9,8 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY frontend/package*.json ./frontend/
-COPY shared/package.json ./shared/
+COPY workspaces/frontend/package*.json ./workspaces/frontend/
+COPY workspaces/shared/package.json ./workspaces/shared/
 
 # Install dependencies
 RUN npm ci --only=production && npm cache clean --force
@@ -21,20 +21,20 @@ WORKDIR /app
 
 # Copy package files and source code
 COPY package*.json ./
-COPY tsconfig.json ./
-COPY frontend/ ./frontend/
-COPY shared/ ./shared/
-COPY infrastructure/ ./infrastructure/
+COPY config/typescript/tsconfig.json ./tsconfig.json
+COPY workspaces/frontend/ ./workspaces/frontend/
+COPY workspaces/shared/ ./workspaces/shared/
+COPY database/ ./database/
 
 # Install all dependencies (including dev dependencies for build)
 RUN npm ci
 
 # Build shared module first
-WORKDIR /app/shared
+WORKDIR /app/workspaces/shared
 RUN npm run build
 
 # Build the frontend application
-WORKDIR /app/frontend
+WORKDIR /app/workspaces/frontend
 RUN npm run build
 
 # Production image
@@ -46,13 +46,13 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 astro
 
 # Copy built application
-COPY --from=builder --chown=astro:nodejs /app/frontend/dist ./dist
-COPY --from=builder --chown=astro:nodejs /app/frontend/package*.json ./
+COPY --from=builder --chown=astro:nodejs /app/workspaces/frontend/dist ./dist
+COPY --from=builder --chown=astro:nodejs /app/workspaces/frontend/package*.json ./
 COPY --from=deps --chown=astro:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=astro:nodejs /app/shared ./shared
+COPY --from=builder --chown=astro:nodejs /app/workspaces/shared ./shared
 
 # Copy necessary configuration files
-COPY --from=builder --chown=astro:nodejs /app/frontend/astro.config.mjs ./astro.config.mjs
+COPY --from=builder --chown=astro:nodejs /app/workspaces/frontend/astro.config.mjs ./astro.config.mjs
 
 # Create upload directories
 RUN mkdir -p uploads/evidence && \
