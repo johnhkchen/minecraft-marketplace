@@ -71,21 +71,22 @@ evidence (id, report_id, evidence_type, file_path, verified_by)
 ### Epic 1: Price Discovery
 - Search items (<2s response), filter by category/server/price (<500ms)
 - Human-readable pricing display, price history trends
+- **UI/UX Focus**: Clean, intuitive search interface with visual feedback
 
 ### Epic 2: Community Reporting  
 - Submit reports with screenshot evidence + confidence scoring
 - Auto-approval for high-confidence stock changes
-- Shop owner dashboard with Discord notifications
+- **UI/UX Focus**: Simple report submission flow, clear status indicators
 
 ### Epic 3: Discord Integration
 - Discord OAuth authentication + JWT generation
-- Real-time webhook notifications (<1 minute delivery)
-- Profile integration for community recognition
+- Basic webhook notifications (when available)
+- **UI/UX Focus**: Seamless login experience, clear profile display
 
 ### Epic 4: Shop Management
 - Item listing with diamond pricing + trading unit selection
-- Real-time inventory management + immediate search updates
-- Analytics dashboard with performance metrics
+- Basic inventory management with manual updates
+- **UI/UX Focus**: Intuitive item creation forms, clear pricing display
 
 ### Performance Requirements
 - Search: <2s with 10,000+ items

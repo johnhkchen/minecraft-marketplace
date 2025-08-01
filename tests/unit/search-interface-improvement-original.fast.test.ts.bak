@@ -1,0 +1,324 @@
+/**
+ * Search Interface Improvement Tests
+ * TDD approach for better UI/UX with visual feedback and loading states
+ * Focus on foundational user experience over complex technical features
+ * Updated to test our implemented state management
+ */
+
+import { describe, test, expect, beforeEach } from 'vitest';
+import { get } from 'svelte/store';
+import { setupFastTests, expectFastExecution } from '../utils/fast-test-setup.js';
+import { searchState, searchActions, searchStatus, performanceFeedback, userGuidance } from '../../workspaces/frontend/src/lib/search-interface-state.js';
+
+// Setup fast tests with MSW mocking
+setupFastTests();
+
+describe('Search Interface Improvement - TDD UI/UX Focus', () => {
+  
+  beforeEach(() => {
+    // Reset search state before each test
+    searchState.set({
+      searchTerm: '', results: [], isLoading: false, showSpinner: false, searchComplete: false,
+      searchDuration: 0, showTiming: false, timingMessage: '', message: '', resultCount: 0,
+      hasResults: true, emptyMessage: '', showSuggestions: false, suggestions: [],
+      isSlowSearch: false, slowSearchMessage: '', showProgressBar: false,
+      hasError: false, errorMessage: '', retryAvailable: false, fallbackResults: [],
+      isOnline: true, offlineMessage: '', showOfflineIndicator: false, cachedResults: [],
+      showSearchSuggestions: false, activeSuggestion: -1, inputValue: '',
+      highlightMatches: false, placeholder: '', showHints: false, hints: [], focusState: 'unfocused',
+      sortBy: 'relevance', showSortOptions: false, resultCategories: [], relevanceScores: [],
+      showGuidance: false, searchTips: [], popularSearches: [], categoryLinks: []
+    });
+  });
+  
+  describe('🔍 Search Visual Feedback (NOW PASSING with state management)', () => {
+    test('should show loading spinner during search', async () => {
+      const start = performance.now();
+      
+      // Use our implemented state management
+      searchActions.startSearch('diamond sword');
+      const state = get(searchState);
+      
+      // These now pass with our implementation
+      expect(state.isLoading).toBe(true);
+      expect(state.showSpinner).toBe(true);
+      expect(state.searchTerm).toBe('diamond sword');
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('FAILING: should show search progress with result count', async () => {
+      const start = performance.now();
+      
+      // This test defines the UX we want but doesn't exist yet
+      const searchFeedback = {
+        message: '', // Should show "Searching..." then "Found X items"
+        resultCount: 0,
+        searchComplete: false
+      };
+      
+      // Simulate search progression
+      searchFeedback.message = 'Searching...';
+      // TODO: Implement progressive search feedback
+      
+      // These expectations will fail initially
+      expect(searchFeedback.message).toBe('Searching...'); // Will pass
+      expect(searchFeedback.resultCount).toBeGreaterThan(0); // WILL FAIL
+      expect(searchFeedback.searchComplete).toBe(true); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('FAILING: should provide clear visual feedback for empty results', async () => {
+      const start = performance.now();
+      
+      // Define UX for when no items are found
+      const emptySearchState = {
+        hasResults: true, // This should be false for empty results
+        emptyMessage: '', // Should show helpful message
+        showSuggestions: false, // Should show search suggestions
+        suggestions: []
+      };
+      
+      // Simulate empty search result
+      emptySearchState.hasResults = false;
+      // TODO: Implement empty state handling
+      
+      // These will fail until we implement empty state UX
+      expect(emptySearchState.hasResults).toBe(false); // Will pass
+      expect(emptySearchState.emptyMessage).toBe('No items found. Try different keywords or browse categories.'); // WILL FAIL
+      expect(emptySearchState.showSuggestions).toBe(true); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('⚡ Search Performance Feedback (FAILING - needs implementation)', () => {
+    test('FAILING: should show search timing for performance transparency', async () => {
+      const start = performance.now();
+      
+      // Users should see how fast the search is (builds confidence)
+      const performanceFeedback = {
+        searchDuration: 0, // Should capture actual search time
+        showTiming: false, // Should show timing to user
+        timingMessage: '' // Should format timing nicely
+      };
+      
+      // Simulate search timing
+      const searchStart = Date.now();
+      // TODO: Implement search timing capture
+      const searchEnd = Date.now();
+      performanceFeedback.searchDuration = searchEnd - searchStart;
+      
+      // These will fail until timing feedback is implemented
+      expect(performanceFeedback.searchDuration).toBeGreaterThan(0); // Will pass
+      expect(performanceFeedback.showTiming).toBe(true); // WILL FAIL
+      expect(performanceFeedback.timingMessage).toMatch(/Found \d+ items in \d+ms/); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 10);
+    });
+
+    test('FAILING: should warn user when search is taking longer than expected', async () => {
+      const start = performance.now();
+      
+      // If search takes >1 second, show user something is happening
+      const slowSearchFeedback = {
+        isSlowSearch: false, // Should be true for slow searches
+        slowSearchMessage: '', // Should explain what's happening
+        showProgressBar: false // Should show progress indication
+      };
+      
+      // Simulate slow search detection
+      const searchDuration = 1500; // 1.5 seconds
+      if (searchDuration > 1000) {
+        // TODO: Implement slow search handling
+        slowSearchFeedback.isSlowSearch = true;
+      }
+      
+      // These will fail until slow search UX is implemented
+      expect(slowSearchFeedback.isSlowSearch).toBe(true); // Will pass
+      expect(slowSearchFeedback.slowSearchMessage).toBe('Searching through many items... this may take a moment.'); // WILL FAIL
+      expect(slowSearchFeedback.showProgressBar).toBe(true); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('🎨 Search Input Enhancement (FAILING - needs implementation)', () => {
+    test('FAILING: should show search suggestions as user types', async () => {
+      const start = performance.now();
+      
+      // Autocomplete makes search much more user-friendly
+      const searchSuggestions = {
+        suggestions: [], // Should populate as user types
+        showSuggestions: false, // Should show dropdown
+        activeSuggestion: -1, // Should track keyboard navigation
+        inputValue: ''
+      };
+      
+      // Simulate user typing
+      searchSuggestions.inputValue = 'dia';
+      // TODO: Implement search suggestions
+      
+      // These will fail until suggestions are implemented
+      expect(searchSuggestions.suggestions).toContain('diamond sword'); // WILL FAIL
+      expect(searchSuggestions.suggestions).toContain('diamond pickaxe'); // WILL FAIL
+      expect(searchSuggestions.showSuggestions).toBe(true); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('FAILING: should highlight search terms in results', async () => {
+      const start = performance.now();
+      
+      // Make it clear why results matched the search
+      const searchHighlighting = {
+        searchTerm: 'diamond',
+        results: [
+          { name: 'Diamond Sword', highlighted: false }, // Should be highlighted
+          { name: 'Iron Sword', highlighted: false }     // Should not be highlighted
+        ],
+        highlightMatches: false // Should be enabled
+      };
+      
+      // TODO: Implement search term highlighting
+      
+      // These will fail until highlighting is implemented
+      expect(searchHighlighting.highlightMatches).toBe(true); // WILL FAIL
+      expect(searchHighlighting.results[0].highlighted).toBe(true); // WILL FAIL
+      expect(searchHighlighting.results[1].highlighted).toBe(false); // Will pass
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('FAILING: should provide clear search input placeholder and hints', async () => {
+      const start = performance.now();
+      
+      // Users need to understand what they can search for
+      const searchInputGuidance = {
+        placeholder: '', // Should be helpful
+        showHints: false, // Should show search tips
+        hints: [], // Should contain useful examples
+        focusState: 'unfocused' // Should change on focus
+      };
+      
+      // Simulate input focus
+      searchInputGuidance.focusState = 'focused';
+      // TODO: Implement search guidance
+      
+      // These will fail until guidance is implemented
+      expect(searchInputGuidance.placeholder).toBe('Search for items (e.g., "diamond sword", "jungle biome")'); // WILL FAIL
+      expect(searchInputGuidance.showHints).toBe(true); // WILL FAIL
+      expect(searchInputGuidance.hints).toContain('Try searching by item name, category, or biome'); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('📱 Search Error Handling (FAILING - needs implementation)', () => {
+    test('FAILING: should gracefully handle search API errors', async () => {
+      const start = performance.now();
+      
+      // When search fails, user should know what happened and what to do
+      const errorHandling = {
+        hasError: false, // Should be true when error occurs
+        errorMessage: '', // Should be user-friendly
+        retryAvailable: false, // Should offer retry option
+        fallbackResults: [] // Should show cached/recent results
+      };
+      
+      // Simulate API error
+      const apiError = new Error('Network timeout');
+      errorHandling.hasError = true;
+      // TODO: Implement error handling UX
+      
+      // These will fail until error handling is implemented
+      expect(errorHandling.hasError).toBe(true); // Will pass
+      expect(errorHandling.errorMessage).toBe('Search temporarily unavailable. Showing recent results.'); // WILL FAIL
+      expect(errorHandling.retryAvailable).toBe(true); // WILL FAIL
+      expect(errorHandling.fallbackResults.length).toBeGreaterThan(0); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('FAILING: should handle network connectivity issues', async () => {
+      const start = performance.now();
+      
+      // Offline/slow network should not break the experience
+      const connectivityHandling = {
+        isOnline: true, // Should detect connectivity
+        offlineMessage: '', // Should explain offline state
+        cachedResults: [], // Should use cached data when offline
+        showOfflineIndicator: false
+      };
+      
+      // Simulate going offline
+      connectivityHandling.isOnline = false;
+      // TODO: Implement offline handling
+      
+      // These will fail until offline handling is implemented
+      expect(connectivityHandling.isOnline).toBe(false); // Will pass
+      expect(connectivityHandling.offlineMessage).toBe('No internet connection. Showing previously loaded items.'); // WILL FAIL
+      expect(connectivityHandling.showOfflineIndicator).toBe(true); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('🎯 Search Results Organization (FAILING - needs implementation)', () => {
+    test('FAILING: should organize results by relevance with clear indicators', async () => {
+      const start = performance.now();
+      
+      // Users should understand why results are ordered this way
+      const resultsOrganization = {
+        sortBy: 'relevance', // Should be clear
+        showSortOptions: false, // Should let users change sorting
+        resultCategories: [], // Should group similar items
+        relevanceScores: [] // Should show why items match
+      };
+      
+      // TODO: Implement result organization
+      
+      // These will fail until organization is implemented
+      expect(resultsOrganization.showSortOptions).toBe(true); // WILL FAIL
+      expect(resultsOrganization.resultCategories).toContain('Exact Matches'); // WILL FAIL
+      expect(resultsOrganization.resultCategories).toContain('Similar Items'); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('FAILING: should provide clear "no results" guidance', async () => {
+      const start = performance.now();
+      
+      // When search finds nothing, help the user succeed
+      const noResultsGuidance = {
+        showGuidance: false, // Should show helpful tips
+        searchTips: [], // Should suggest alternatives
+        popularSearches: [], // Should show what others search for
+        categoryLinks: [] // Should offer browsing alternative
+      };
+      
+      // TODO: Implement no results guidance
+      
+      // These will fail until guidance is implemented
+      expect(noResultsGuidance.showGuidance).toBe(true); // WILL FAIL
+      expect(noResultsGuidance.searchTips).toContain('Try fewer keywords'); // WILL FAIL
+      expect(noResultsGuidance.searchTips).toContain('Check spelling'); // WILL FAIL
+      expect(noResultsGuidance.popularSearches.length).toBeGreaterThan(0); // WILL FAIL
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+});
