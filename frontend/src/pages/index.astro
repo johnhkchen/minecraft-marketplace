@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/BaseLayout.astro';
+import EnhancedHomepage from '../components/EnhancedHomepage.svelte';
+import { loadHomepageData } from '../lib/homepage-data.js';
+
+// Load homepage data server-side
+const homepageData = await loadHomepageData();
+---
+
+<Layout title="Minecraft Item Marketplace - Buy & Sell Minecraft Items">
+	<EnhancedHomepage client:load homepageData={homepageData} />
+</Layout>

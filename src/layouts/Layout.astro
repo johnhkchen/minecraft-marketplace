@@ -1,0 +1,48 @@
+---
+export interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Minecraft Marketplace - Like NASDAQ for Minecraft items. Buy and sell shulkers with diamond blocks." />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<main>
+			<slot />
+		</main>
+	</body>
+</html>
+
+<style is:global>
+	* {
+		box-sizing: border-box;
+	}
+	
+	html {
+		font-family: 'Courier New', monospace;
+		background: #2d5016;
+		color: #fff;
+	}
+	
+	body {
+		margin: 0;
+		min-height: 100vh;
+		background: linear-gradient(135deg, #2d5016 0%, #4a7c59 100%);
+	}
+	
+	main {
+		padding: 1rem;
+		width: 100%;
+		max-width: 100%;
+	}
+</style>

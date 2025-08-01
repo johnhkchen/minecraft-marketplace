@@ -1,0 +1,83 @@
+# Test Environment - Extends base services for isolated testing
+# Usage: docker compose -f compose.test.yml up -d
+
+services:
+  # ============================================================================
+  # Test Database - Isolated PostgreSQL for testing
+  # ============================================================================
+  test-db:
+    image: postgres:17-alpine
+    container_name: minecraft-marketplace-test-db
+    environment:
+      - POSTGRES_DB=marketplace_test
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - ./tests/fixtures/test-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./tests/fixtures/test-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d marketplace_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=50
+      -c shared_buffers=128MB
+    networks:
+      - test-network
+
+  # ============================================================================
+  # Test PostgREST - Connected to test database
+  # ============================================================================
+  test-postgrest:
+    image: postgrest/postgrest:v12.2.0
+    container_name: minecraft-marketplace-test-postgrest
+    environment:
+      - PGRST_DB_URI=postgres://test_user:test_password@test-db:5432/marketplace_test
+      - PGRST_DB_SCHEMAS=public
+      - PGRST_DB_ANON_ROLE=test_user
+      - PGRST_JWT_SECRET=test-jwt-secret-key-for-testing-only
+      - PGRST_DB_USE_LEGACY_GUCS=false
+      - PGRST_LOG_LEVEL=info
+    ports:
+      - "3001:3000"  # Different port to avoid conflicts
+    depends_on:
+      test-db:
+        condition: service_healthy
+    # No health check - PostgREST container is minimal
+    networks:
+      - test-network
+
+  # ============================================================================
+  # Test nginx - Routes to test services
+  # ============================================================================
+  test-nginx:
+    image: nginx:alpine
+    container_name: minecraft-marketplace-test-nginx
+    ports:
+      - "2888:80"  # Port expected by existing tests
+    volumes:
+      - ./tests/fixtures/nginx-test.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - test-postgrest
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - test-network
+
+# ============================================================================
+# Test Network - Isolated from production
+# ============================================================================
+networks:
+  test-network:
+    name: minecraft-marketplace-test-network
+    driver: bridge

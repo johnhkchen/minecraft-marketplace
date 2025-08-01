@@ -1,0 +1,87 @@
+{
+  "name": "Minecraft Marketplace Dev Environment",
+  "image": "nixos/nix:latest",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true
+    },
+    "ghcr.io/devcontainers/features/nix:1": {
+      "version": "latest",
+      "multiUser": false,
+      "flakes": true
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    }
+  },
+  "postCreateCommand": "nix develop --command bash -c 'echo \"🚀 Development environment ready!\" && npm install'",
+  "postStartCommand": "nix develop --command bash -c 'docker compose up -d && echo \"📱 Services starting...\"'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "astro-build.astro-vscode",
+        "svelte.svelte-vscode", 
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next",
+        "vitest.explorer",
+        "ms-vscode.test-adapter-converter",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "ms-vscode.vscode-json"
+      ],
+      "settings": {
+        "typescript.preferences.quoteStyle": "single",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll": true
+        },
+        "astro.typescript.allowArbitraryAttributes": true
+      }
+    }
+  },
+  "forwardPorts": [
+    7410,
+    7411,
+    7412,
+    7413,
+    7414,
+    7415
+  ],
+  "portsAttributes": {
+    "7410": {
+      "label": "nginx Entry Point",
+      "onAutoForward": "notify"
+    },
+    "7411": {
+      "label": "Frontend (Astro)",
+      "onAutoForward": "silent"
+    },
+    "7412": {
+      "label": "Backend (Hono)",
+      "onAutoForward": "silent"
+    },
+    "7413": {
+      "label": "Database API (PostgREST)", 
+      "onAutoForward": "silent"
+    }
+  },
+  "remoteUser": "vscode",
+  "containerUser": "vscode",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "NIX_CONFIG": "experimental-features = nix-command flakes"
+  },
+  "initializeCommand": "echo '🏗️ Initializing Minecraft Marketplace development environment...'",
+  "onCreateCommand": "echo '📦 Codespace created! Running nix develop setup...'",
+  "capAdd": ["SYS_PTRACE"],
+  "securityOpt": ["seccomp:unconfined"],
+  "privileged": false,
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb",
+    "storage": "10gb"
+  }
+}

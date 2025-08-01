@@ -1,0 +1,69 @@
+# Minecraft Marketplace - Backend Dockerfile
+# Hono API server for external integrations
+
+FROM node:22-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+COPY shared/package.json ./shared/
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Build the application
+FROM base AS builder
+WORKDIR /app
+
+# Copy package files and source code
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY backend/ ./backend/
+COPY shared/ ./shared/
+
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci
+
+# Build shared module first
+WORKDIR /app/shared
+RUN npm run build
+
+# Build the backend application
+WORKDIR /app/backend
+RUN npm run build
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 hono
+
+# Copy built application
+COPY --from=builder --chown=hono:nodejs /app/backend/dist ./dist
+COPY --from=builder --chown=hono:nodejs /app/backend/package*.json ./
+COPY --from=deps --chown=hono:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=hono:nodejs /app/shared ./shared
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3001
+
+# Expose port
+EXPOSE 3001
+
+# Switch to non-root user
+USER hono
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
+
+# Start the application
+CMD ["node", "./dist/index.js"]

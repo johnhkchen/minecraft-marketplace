@@ -1,0 +1,81 @@
+# Demo Deployment Configuration
+# 
+# Purpose: Working demo that others can access for collaboration validation
+# Usage: docker compose -f compose.demo.yml up -d
+
+version: '3.8'
+
+services:
+  # Main application with demo data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4321:4321"
+    environment:
+      - NODE_ENV=demo
+      - POSTGRES_DB=minecraft_marketplace_demo
+      - POSTGRES_USER=demo_user
+      - POSTGRES_PASSWORD=demo_secure_password_2024
+      - JWT_SECRET=demo_jwt_secret_for_collaboration_testing
+      - DISCORD_CLIENT_ID=demo_discord_client_id
+      - DISCORD_CLIENT_SECRET=demo_discord_client_secret
+    depends_on:
+      - postgres
+      - valkey
+    volumes:
+      - ./demo-data:/app/demo-data:ro
+
+  # PostgreSQL with demo data
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_DB=minecraft_marketplace_demo
+      - POSTGRES_USER=demo_user
+      - POSTGRES_PASSWORD=demo_secure_password_2024
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_demo_data:/var/lib/postgresql/data
+      - ./database/demo-seed.sql:/docker-entrypoint-initdb.d/demo-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo_user -d minecraft_marketplace_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Valkey for session storage
+  valkey:
+    image: valkey/valkey:8.1-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_demo_data:/data
+    command: valkey-server --appendonly yes
+
+  # PostgREST API for demo
+  postgrest:
+    image: postgrest/postgrest:v12.2
+    ports:
+      - "2888:3000"
+    environment:
+      - PGRST_DB_URI=postgres://demo_user:demo_secure_password_2024@postgres:5432/minecraft_marketplace_demo
+      - PGRST_OPENAPI_SERVER_PROXY_URI=http://localhost:2888
+      - PGRST_DB_ANON_ROLE=anon
+      - PGRST_JWT_SECRET=demo_jwt_secret_for_collaboration_testing
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_demo_data:
+  valkey_demo_data:
+
+# Demo features:
+# - Realistic minecraft data (steve, alex, notch users)
+# - Sample items (diamond swords, iron pickaxes)
+# - Community reports with evidence
+# - Price history and trends
+# - Working search and filtering
+# - Discord OAuth simulation

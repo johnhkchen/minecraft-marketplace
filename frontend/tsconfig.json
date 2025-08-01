@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["../shared/*"],
+      "@backend/*": ["../backend/src/*"],
+      "@tests/*": ["../tests/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "../shared/**/*",
+    "../.astro/types.d.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    ".astro"
+  ],
+  "references": [
+    { "path": "../shared" }
+  ]
+}

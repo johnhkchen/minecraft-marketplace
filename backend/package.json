@@ -1,0 +1,35 @@
+{
+  "name": "@minecraft-marketplace/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Hono backend for external integrations and heavy processing",
+  "scripts": {
+    "dev": "PORT=7412 tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.0",
+    "hono": "^4.8.0",
+    "pg": "^8.11.5",
+    "uuid": "^11.0.3",
+    "redis": "^4.7.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.2",
+    "@types/uuid": "^10.0.0",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

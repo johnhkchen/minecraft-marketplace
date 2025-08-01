@@ -1,0 +1,348 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+env:
+  NODE_VERSION: '18'
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  foundation-validation:
+    name: Foundation & Architecture Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Validate service contracts
+        run: npm run test:contracts
+        
+      - name: Validate DI container
+        run: npm run test:di-container
+        
+      - name: Validate Docker builds
+        run: npm run docker:build-test
+        
+      - name: Validate service health checks
+        run: npm run docker:health-check
+
+  code-quality:
+    name: Code Quality & Standards
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: TypeScript validation
+        run: npm run type-check
+        
+      - name: Linting and formatting
+        run: npm run lint
+        
+      - name: Test coverage validation
+        run: npm run test:coverage
+        
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          fail_ci_if_error: true
+          
+  database-validation:
+    name: Database Schema & Migrations
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: test_user
+          POSTGRES_DB: test_marketplace
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+          
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Validate database schema
+        run: npm run db:validate-schema
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: test_marketplace
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          
+      - name: Test database migrations
+        run: npm run db:test-migrations
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: test_marketplace
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+
+  unit-testing:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run unit tests
+        run: npm run test:unit
+        
+      - name: Test business rules
+        run: npm run test:business-rules
+        
+      - name: Test error handling
+        run: npm run test:error-handling
+
+  integration-testing:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: test_user
+          POSTGRES_DB: test_marketplace
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+          
+      valkey:
+        image: valkey/valkey:7.2-alpine
+        options: >-
+          --health-cmd "valkey-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+          
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: test_marketplace
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          VALKEY_HOST: localhost
+          VALKEY_PORT: 6379
+          
+      - name: Test repository layer
+        run: npm run test:integration:repositories
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: test_marketplace
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+
+  e2e-testing:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        
+      - name: Create test environment file
+        run: |
+          cp .env.example .env.test
+          echo "NODE_ENV=test" >> .env.test
+          echo "POSTGRES_PASSWORD=test_password" >> .env.test
+          echo "JWT_SECRET=test_jwt_secret_minimum_32_characters" >> .env.test
+          
+      - name: Start full stack
+        run: docker compose -f infrastructure/docker/compose.yml up -d
+        env:
+          COMPOSE_FILE: infrastructure/docker/compose.yml
+          
+      - name: Wait for services to be ready
+        run: ./scripts/wait-for-services.sh
+        timeout-minutes: 5
+        
+      - name: Run E2E tests
+        run: npm run test:e2e
+        
+      - name: Fresh install validation
+        run: |
+          docker compose down -v
+          npm run docker:fresh-install
+          
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  security-validation:
+    name: Security & Authentication Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run security tests
+        run: npm run test:security
+        
+      - name: Test authentication flows
+        run: npm run test:authentication
+        
+      - name: Test authorization rules
+        run: npm run test:authorization
+        
+      - name: Validate RLS policies
+        run: npm run test:rls-policies
+
+  performance-validation:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Start test environment
+        run: docker compose -f infrastructure/docker/compose.yml up -d
+        
+      - name: Wait for services
+        run: ./scripts/wait-for-services.sh
+        
+      - name: Run performance tests
+        run: npm run test:performance
+        
+      - name: Validate search performance (<2s)
+        run: npm run test:search-performance
+        
+      - name: Validate API performance (<200ms)
+        run: npm run test:api-performance
+
+  validation-summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [foundation-validation, code-quality, database-validation, unit-testing, integration-testing, e2e-testing, security-validation, performance-validation]
+    if: always()
+    
+    steps:
+      - name: Check all validations passed
+        run: |
+          if [[ "${{ needs.foundation-validation.result }}" == "success" && \
+                "${{ needs.code-quality.result }}" == "success" && \
+                "${{ needs.database-validation.result }}" == "success" && \
+                "${{ needs.unit-testing.result }}" == "success" && \
+                "${{ needs.integration-testing.result }}" == "success" && \
+                "${{ needs.e2e-testing.result }}" == "success" && \
+                "${{ needs.security-validation.result }}" == "success" && \
+                "${{ needs.performance-validation.result }}" == "success" ]]; then
+            echo "✅ All validation gates passed - PR ready for review"
+          else
+            echo "❌ Some validation gates failed - PR needs fixes"
+            exit 1
+          fi

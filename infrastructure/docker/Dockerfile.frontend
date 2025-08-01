@@ -1,0 +1,77 @@
+# Minecraft Marketplace - Frontend Dockerfile
+# Astro SSR + Svelte components + secure API routes
+
+FROM node:22-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY frontend/package*.json ./frontend/
+COPY shared/package.json ./shared/
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Build the application
+FROM base AS builder
+WORKDIR /app
+
+# Copy package files and source code
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY frontend/ ./frontend/
+COPY shared/ ./shared/
+COPY infrastructure/ ./infrastructure/
+
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci
+
+# Build shared module first
+WORKDIR /app/shared
+RUN npm run build
+
+# Build the frontend application
+WORKDIR /app/frontend
+RUN npm run build
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 astro
+
+# Copy built application
+COPY --from=builder --chown=astro:nodejs /app/frontend/dist ./dist
+COPY --from=builder --chown=astro:nodejs /app/frontend/package*.json ./
+COPY --from=deps --chown=astro:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=astro:nodejs /app/shared ./shared
+
+# Copy necessary configuration files
+COPY --from=builder --chown=astro:nodejs /app/frontend/astro.config.mjs ./astro.config.mjs
+
+# Create upload directories
+RUN mkdir -p uploads/evidence && \
+    chown -R astro:nodejs uploads
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=4321
+
+# Expose port
+EXPOSE 4321
+
+# Switch to non-root user
+USER astro
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:4321/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
+
+# Start the application
+CMD ["node", "./dist/server/entry.mjs"]

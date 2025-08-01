@@ -1,0 +1,186 @@
+# Minecraft Marketplace - Production Deployment
+# Fresh install guarantee: `docker compose up --build`
+
+services:
+  # ============================================================================
+  # nginx Reverse Proxy - Single Entry Point
+  # ============================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: minecraft-marketplace-nginx
+    ports:
+      - "7410:80"
+      - "7443:443"
+    volumes:
+      - ./infrastructure/docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./uploads:/app/uploads:ro
+    depends_on:
+      - frontend
+      - backend
+      - postgrest
+      - swagger-ui
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # Frontend - Astro SSR + Svelte Components
+  # ============================================================================
+  frontend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.frontend
+    container_name: minecraft-marketplace-frontend
+    environment:
+      - NODE_ENV=production
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-minecraft_marketplace}
+      - POSTGRES_USER=${POSTGRES_USER:-marketplace_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+      - VALKEY_HOST=valkey
+      - VALKEY_PORT=6379
+      - ASTRO_SECRET_KEY=${ASTRO_SECRET_KEY:-change_me_in_production}
+      - ASTRO_SESSION_SECRET=${ASTRO_SESSION_SECRET:-change_me_in_production}
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI:-http://marketplace.local:7410/api/auth/discord/callback}
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+    restart: unless-stopped
+
+  # ============================================================================
+  # Backend - Hono External Integrations
+  # ============================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.backend
+    container_name: minecraft-marketplace-backend
+    environment:
+      - NODE_ENV=production
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-minecraft_marketplace}
+      - POSTGRES_USER=${POSTGRES_USER:-marketplace_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+      - HONO_JWT_SECRET=${HONO_JWT_SECRET:-change_me_in_production}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - BAML_API_KEY=${BAML_API_KEY}
+      - BAML_MODEL=${BAML_MODEL:-gpt-4}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ============================================================================
+  # Database - PostgreSQL 17+
+  # ============================================================================
+  db:
+    image: postgres:17-alpine
+    container_name: minecraft-marketplace-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-minecraft_marketplace}
+      - POSTGRES_USER=${POSTGRES_USER:-marketplace_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/database/schema:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-marketplace_user} -d ${POSTGRES_DB:-minecraft_marketplace}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+
+  # ============================================================================
+  # PostgREST - Auto-Generated REST API
+  # ============================================================================
+  postgrest:
+    image: postgrest/postgrest:v12.0.2
+    container_name: minecraft-marketplace-postgrest
+    environment:
+      - PGRST_DB_URI=postgres://${POSTGRES_USER:-marketplace_user}:${POSTGRES_PASSWORD:-change_me_in_production}@db:5432/${POSTGRES_DB:-minecraft_marketplace}
+      - PGRST_DB_SCHEMAS=public
+      - PGRST_DB_ANON_ROLE=${POSTGREST_ANON_ROLE:-anon}
+      - PGRST_JWT_SECRET=${POSTGREST_JWT_SECRET:-change_me_in_production}
+      - PGRST_DB_USE_LEGACY_GUCS=false
+      - PGRST_LOG_LEVEL=info
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://swagger-ui:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # Session Storage - Valkey (Redis-compatible)
+  # ============================================================================
+  valkey:
+    image: valkey/valkey:8.1-alpine
+    container_name: minecraft-marketplace-valkey
+    volumes:
+      - valkey_data:/data
+    restart: unless-stopped
+    command: >
+      valkey-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ============================================================================
+  # API Documentation - Swagger UI
+  # ============================================================================
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: minecraft-marketplace-swagger
+    environment:
+      - SWAGGER_JSON_URL=http://postgrest:3000/
+      - BASE_URL=/docs
+    depends_on:
+      - postgrest
+    restart: unless-stopped
+
+# ============================================================================
+# Volumes for Data Persistence
+# ============================================================================
+volumes:
+  postgres_data:
+    driver: local
+    name: minecraft-marketplace-postgres-data
+  valkey_data:
+    driver: local
+    name: minecraft-marketplace-valkey-data
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  default:
+    name: minecraft-marketplace-network
+    driver: bridge

@@ -1,0 +1,21 @@
+---
+// Simple test page without database dependencies
+const testData = {
+  status: 'working',
+  port: 2888,
+  time: new Date().toISOString()
+};
+---
+
+<html>
+<head>
+    <title>Test Page - Port 2888</title>
+</head>
+<body>
+    <h1>🏗️ Minecraft Marketplace Test</h1>
+    <p>🌐 LIVE at :2888</p>
+    <p>Status: {testData.status}</p>
+    <p>Time: {testData.time}</p>
+    <p>✅ Enhanced frontend is working!</p>
+</body>
+</html>

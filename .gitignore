@@ -1,24 +1,75 @@
-# build output
+# Build outputs
 dist/
-# generated types
 .astro/
 
-# dependencies
+# Dependencies
 node_modules/
+.pnpm-debug.log*
 
-# logs
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Runtime data  
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+*.swp
+*.swo
+*~
 
-# environment variables
-.env
-.env.production
-
-# macOS-specific files
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# jetbrains setting folder
-.idea/
+# Temporary files (following 004 organization plan)
+tmp/
+*.tmp
+*.temp
+
+# Database files (old SQLite artifacts)
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# Runtime uploads
+uploads/
+
+# Test artifacts (will go to tmp/ instead)
+test-marketplace-*.db*
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
