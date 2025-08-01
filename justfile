@@ -207,7 +207,7 @@ infra:
     echo "   🎯 PURPOSE: Complete deployment, not just infrastructure"
     echo ""
     
-    docker compose up -d
+    docker compose -f config/docker/compose.yml up -d
     
     # Wait for services to be ready
     echo "⏳ Waiting for services to be ready..."
@@ -247,14 +247,14 @@ up:
     echo ""
     
     # Check if we should use development compose file
-    if [ -f "compose.dev.yml" ]; then
+    if [ -f "config/docker/compose.dev.yml" ]; then
         echo "🐳 Starting development infrastructure..."
-        docker compose -f compose.dev.yml up -d postgres valkey postgrest nginx
+        docker compose -f config/docker/compose.dev.yml up -d postgres valkey postgrest nginx
         
         # Wait for database to be ready
         echo "⏳ Waiting for database to be ready..."
         timeout=30
-        while ! docker compose -f compose.dev.yml exec postgres pg_isready -U dev_user -d minecraft_marketplace_dev >/dev/null 2>&1; do
+        while ! docker compose -f config/docker/compose.dev.yml exec postgres pg_isready -U dev_user -d minecraft_marketplace_dev >/dev/null 2>&1; do
             sleep 1
             timeout=$((timeout - 1))
             if [ $timeout -eq 0 ]; then
@@ -266,7 +266,7 @@ up:
         echo "🔥 Starting development servers..."
         npm run dev
     else
-        echo "⚠️  No compose.dev.yml found - using production deployment"
+        echo "⚠️  No config/docker/compose.dev.yml found - using production deployment"
         just infra
     fi
 
@@ -307,7 +307,7 @@ status:
     echo ""
     
     # Check if services are running
-    if docker compose ps --quiet | grep -q .; then
+    if docker compose -f config/docker/compose.yml ps --quiet | grep -q .; then
         echo "✅ DEPLOYMENT STATUS: Services are running"
         echo ""
         echo "🌐 ACCESS POINTS:"
@@ -316,7 +316,7 @@ status:
         echo "   • Database API: http://localhost:7410/api/data"
         echo ""
         echo "📋 SERVICE HEALTH:"
-        docker compose ps
+        docker compose -f config/docker/compose.yml ps
         
         echo ""
         echo "🏥 CONNECTIVITY TEST:"
@@ -370,11 +370,11 @@ down:
     echo "   🔄 TO RESTART: just infra (production) or just up (development)"
     echo ""
     
-    docker compose down
+    docker compose -f config/docker/compose.yml down
     
     # Also stop dev compose if it exists
-    if [ -f "compose.dev.yml" ]; then
-        docker compose -f compose.dev.yml down 2>/dev/null || true
+    if [ -f "config/docker/compose.dev.yml" ]; then
+        docker compose -f config/docker/compose.dev.yml down 2>/dev/null || true
     fi
     
     echo "✅ All services stopped successfully"
@@ -397,7 +397,7 @@ logs:
     echo "   • postgrest: Auto-generated REST API"
     echo ""
     
-    docker compose logs -f --tail=50
+    docker compose -f config/docker/compose.yml logs -f --tail=50
 
 # === Maintenance Commands ===
 
@@ -453,7 +453,7 @@ health:
     echo ""
     
     # Check if services are running
-    if ! docker compose ps --quiet | grep -q .; then
+    if ! docker compose -f config/docker/compose.yml ps --quiet | grep -q .; then
         echo "❌ DEPLOYMENT: No services running"
         echo "🚀 FIX: Run 'just infra' to start services"
         exit 1
@@ -474,7 +474,7 @@ health:
     # Check service health status
     echo ""
     echo "2. Service Health Status"
-    docker compose ps
+    docker compose -f config/docker/compose.yml ps
     
     echo ""
     echo "🎉 ALL HEALTH CHECKS PASSED!"

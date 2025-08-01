@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "../../workspaces/**/*",
+    "../../tests/**/*",
+    "../../scripts/**/*"
+  ],
+  "exclude": [
+    "../../node_modules",
+    "../../workspaces/*/node_modules",
+    "../../workspaces/*/dist",
+    "../../.local",
+    "../../coverage",
+    "../../dist"
+  ]
+}

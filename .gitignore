@@ -73,3 +73,8 @@ test-marketplace-*.db*
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+.local/
+coverage/
+dist/
+playwright-report/
+node_modules/

@@ -7,7 +7,7 @@ export default defineConfig(
     test: {
       globals: true,
       environment: 'node', // For API and database tests (not jsdom)
-      setupFiles: ['./tests/setup.ts'],
+      setupFiles: ['../../tests/setup.ts'],
       // globalTeardown: './tests/setup/global-teardown.ts', // Not supported in current vitest version
       
       // Test database isolation - each test gets clean PostgreSQL state
@@ -48,10 +48,10 @@ export default defineConfig(
       
       // File patterns following organized test structure
       include: [
-        'tests/unit/**/*.test.ts',
-        'tests/integration/**/*.test.ts',
-        'tests/security/**/*.test.ts',
-        'tests/performance/**/*.test.ts'
+        '../../tests/unit/**/*.test.ts',
+        '../../tests/integration/**/*.test.ts',
+        '../../tests/security/**/*.test.ts',
+        '../../tests/performance/**/*.test.ts'
         // NOTE: tests/collaboration/ excluded from regular runs (requires Docker)
         // Use npm run test:collaboration to run these heavy tests
       ],
@@ -66,14 +66,10 @@ export default defineConfig(
     // Resolve configuration for monorepo path mapping
     resolve: {
       alias: {
-        '@': '/src',
-        '@/types': '/src/types',
-        '@/lib': '/src/lib',
-        '@/components': '/src/components',
-        '@shared': '/shared',
-        '@frontend': '/frontend/src',
-        '@backend': '/backend/src',
-        '@tests': '/tests'
+        '@shared': '../../workspaces/shared',
+        '@frontend': '../../workspaces/frontend/src',
+        '@backend': '../../workspaces/backend/src',
+        '@tests': '../../tests'
       }
     }
   })

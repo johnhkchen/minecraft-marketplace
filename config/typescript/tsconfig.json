@@ -1,0 +1,21 @@
+{
+  "extends": "./base.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "@shared/*": ["workspaces/shared/*"],
+      "@frontend/*": ["workspaces/frontend/src/*"],
+      "@backend/*": ["workspaces/backend/src/*"],
+      "@tests/*": ["tests/*"]
+    },
+    "composite": true,
+    "incremental": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "references": [
+    { "path": "../../workspaces/shared" },
+    { "path": "../../workspaces/frontend" },
+    { "path": "../../workspaces/backend" }
+  ]
+}
