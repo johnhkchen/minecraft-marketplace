@@ -135,7 +135,7 @@ describe('Information Architecture - Content Strategy Validation', () => {
 
 describe('Information Architecture - Navigation Structure', () => {
   it('creates proper navigation component with HATEOAS principles', () => {
-    const navPath = path.join(process.cwd(), 'src/components/Navigation.svelte');
+    const navPath = path.join(process.cwd(), 'workspaces/frontend/src/components/Navigation.svelte');
     
     // Navigation component should exist
     expect(fs.existsSync(navPath)).toBe(true);

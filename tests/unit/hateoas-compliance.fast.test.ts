@@ -11,11 +11,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
-import MarketplaceBrowser from '../../src/components/MarketplaceBrowser.svelte';
-import Navigation from '../../src/components/Navigation.svelte';
+import MarketplaceBrowser from '../../workspaces/frontend/src/components/marketplace/MarketplaceBrowser.svelte';
+import Navigation from '../../workspaces/frontend/src/components/Navigation.svelte';
 
 // Mock API responses
-vi.mock('../../src/lib/api/marketplace.js', () => ({
+vi.mock('../../workspaces/frontend/src/lib/api/marketplace.js', () => ({
   marketplaceApi: {
     fetchListings: vi.fn(() => Promise.resolve([
       {
@@ -59,7 +59,7 @@ describe('HATEOAS - Action Affordances (H1)', () => {
 
   it('shows appropriate action text based on listing type', async () => {
     // Mock a buy listing (someone wants to buy)
-    vi.mocked(require('../../src/lib/api/marketplace.js').marketplaceApi.fetchListings)
+    vi.mocked(require('../../workspaces/frontend/src/lib/api/marketplace.js').marketplaceApi.fetchListings)
       .mockResolvedValueOnce([{
         listing_id: '2',
         item_name: 'Gold Ingot',
@@ -254,7 +254,7 @@ describe('HATEOAS - Form State Communication (H4)', () => {
 describe('HATEOAS - Error Recovery (H5)', () => {
   it('provides clear error messages with recovery actions', async () => {
     // Mock API failure
-    vi.mocked(require('../../src/lib/api/marketplace.js').marketplaceApi.fetchListings)
+    vi.mocked(require('../../workspaces/frontend/src/lib/api/marketplace.js').marketplaceApi.fetchListings)
       .mockRejectedValueOnce(new Error('Network error'));
 
     render(MarketplaceBrowser, {
@@ -273,7 +273,7 @@ describe('HATEOAS - Error Recovery (H5)', () => {
 
   it('shows no results state with helpful guidance', async () => {
     // Mock empty results
-    vi.mocked(require('../../src/lib/api/marketplace.js').marketplaceApi.fetchListings)
+    vi.mocked(require('../../workspaces/frontend/src/lib/api/marketplace.js').marketplaceApi.fetchListings)
       .mockResolvedValueOnce([]);
 
     render(MarketplaceBrowser, {
@@ -290,7 +290,7 @@ describe('HATEOAS - Error Recovery (H5)', () => {
 
   it('handles disabled states with explanations', async () => {
     // Mock item with no available actions
-    vi.mocked(require('../../src/lib/api/marketplace.js').marketplaceApi.fetchListings)
+    vi.mocked(require('../../workspaces/frontend/src/lib/api/marketplace.js').marketplaceApi.fetchListings)
       .mockResolvedValueOnce([{
         listing_id: '3',
         item_name: 'Unavailable Item',

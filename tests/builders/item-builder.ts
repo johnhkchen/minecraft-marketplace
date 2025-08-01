@@ -5,7 +5,7 @@
  * business specifications rather than technical object construction.
  */
 
-import type { Item, ItemCategory } from '../../shared/types/service-interfaces.js';
+import type { Item, ItemCategory } from '../../workspaces/shared/types/service-interfaces.js';
 
 export class ItemBuilder {
   private item: Partial<Item> = {};

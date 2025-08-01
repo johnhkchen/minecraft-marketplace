@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { formatPrice, formatPriceRange, formatTotalCost, formatAveragePrice } from '../../shared/utils/price-display.js';
+import { formatPrice, formatPriceRange, formatTotalCost, formatAveragePrice } from '../../workspaces/shared/utils/price-display.js';
 
 describe('Price Display - GAMEPLAN Critical Requirements', () => {
   describe('formatPrice - Human-readable pricing', () => {

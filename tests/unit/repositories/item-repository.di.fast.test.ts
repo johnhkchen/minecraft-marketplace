@@ -7,9 +7,9 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { measure, measureSync, expectFastExecution } from '../../utils/fast-test-setup';
-import { ServiceContainer } from '../../../shared/di/container';
-import type { Item, ItemCategory } from '../../../shared/types/service-interfaces.js';
-import { ItemRepository, type IItemRepository } from '../../../shared/repositories/item-repository.js';
+import { ServiceContainer } from '../../../workspaces/shared/di/container';
+import type { Item, ItemCategory } from '../../../workspaces/shared/types/service-interfaces.js';
+import { ItemRepository, type IItemRepository } from '../../../workspaces/shared/repositories/item-repository.js';
 
 // CONFIGURABLE - Minecraft naming conventions
 const TEST_DATA = {

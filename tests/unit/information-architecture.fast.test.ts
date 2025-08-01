@@ -8,8 +8,8 @@
 
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
-import MinecraftMarketplace from '../../src/components/MinecraftMarketplace.svelte';
-import MarketplaceBrowser from '../../src/components/MarketplaceBrowser.svelte';
+import MinecraftMarketplace from '../../workspaces/frontend/src/components/MinecraftMarketplace.svelte';
+import MarketplaceBrowser from '../../workspaces/frontend/src/components/marketplace/MarketplaceBrowser.svelte';
 
 describe('Information Architecture - Homepage', () => {
   it('displays clear site purpose within 5 seconds (IA1)', () => {

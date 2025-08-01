@@ -9,9 +9,9 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { User, UserRole } from '../../../shared/types/service-interfaces.js';
-import { UserRepository, type IUserRepository } from '../../../shared/repositories/user-repository.js';
-import { ServiceContainer } from '../../../shared/di/container.js';
+import type { User, UserRole } from '../../../workspaces/shared/types/service-interfaces.js';
+import { UserRepository, type IUserRepository } from '../../../workspaces/shared/repositories/user-repository.js';
+import { ServiceContainer } from '../../../workspaces/shared/di/container.js';
 import { measure, expectFastExecution } from '../../utils/fast-test-setup.js';
 
 // Minecraft domain test data

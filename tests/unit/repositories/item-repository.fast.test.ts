@@ -7,8 +7,8 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { measure, measureSync, expectFastExecution } from '../../utils/fast-test-setup';
-import type { Item, ItemCategory, TradingUnitType } from '../../../shared/types/service-interfaces.js';
-import { ItemRepository, type IItemRepository } from '../../../shared/repositories/item-repository.js';
+import type { Item, ItemCategory, TradingUnitType } from '../../../workspaces/shared/types/service-interfaces.js';
+import { ItemRepository, type IItemRepository } from '../../../workspaces/shared/repositories/item-repository.js';
 
 // CONFIGURABLE - Update for your project
 const TEST_DATA = {

@@ -9,9 +9,9 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PriceRepository, PriceValidationError } from '../../../shared/repositories/price-repository.js';
-import type { Price, TradingUnitType } from '../../../shared/types/service-interfaces.js';
-import { ServiceContainer } from '../../../shared/di/container.js';
+import { PriceRepository, PriceValidationError } from '../../../workspaces/shared/repositories/price-repository.js';
+import type { Price, TradingUnitType } from '../../../workspaces/shared/types/service-interfaces.js';
+import { ServiceContainer } from '../../../workspaces/shared/di/container.js';
 import { measure, expectFastExecution } from '../../utils/fast-test-setup.js';
 
 // Minecraft domain test data

@@ -2,9 +2,9 @@
 // Following 000_consolidated_specification.md testing requirements
 
 import { describe, test, expect, beforeEach } from 'vitest';
-import { PostgresDB } from '../../src/lib/postgres-db.js';
+import { PostgresDB } from '../../workspaces/frontend/src/lib/postgres-db.js';
 import { createTestUser, cleanupTestDatabase, testClient } from '../setup/test-db-setup.js';
-import type { ItemCategory, CurrencyUnit } from '../../src/types/index.js';
+import type { ItemCategory, CurrencyUnit } from '../../workspaces/frontend/src/types/index.js';
 
 describe('Database Performance Tests', () => {
   let db: PostgresDB;

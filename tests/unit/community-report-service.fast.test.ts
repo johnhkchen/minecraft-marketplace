@@ -9,8 +9,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { CommunityReportService } from '../../shared/services/community-report-service.js';
-import { ServiceContainer } from '../../shared/di/container.js';
+import { CommunityReportService } from '../../workspaces/shared/services/community-report-service.js';
+import { ServiceContainer } from '../../workspaces/shared/di/container.js';
 import { measure, expectFastExecution } from '../utils/fast-test-setup.js';
 
 // Minecraft domain test data

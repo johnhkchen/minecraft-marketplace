@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { MigrationManager } from '../../src/lib/migration-manager.js';
+import { MigrationManager } from '../../workspaces/frontend/src/lib/migration-manager.js';
 import { readFileSync, existsSync, unlinkSync } from 'fs';
 
 describe('MigrationManager', () => {

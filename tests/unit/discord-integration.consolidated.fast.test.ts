@@ -13,7 +13,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ServiceContainer } from '../../shared/di/container.js';
+import { ServiceContainer } from '../../workspaces/shared/di/container.js';
 import { 
   MINECRAFT_TEST_DATA, 
   EpicTestScenarios 

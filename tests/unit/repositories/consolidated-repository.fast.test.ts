@@ -14,10 +14,10 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ItemRepository } from '../../../shared/repositories/item-repository.js';
-import { UserRepository } from '../../../shared/repositories/user-repository.js';
-import { PriceRepository } from '../../../shared/repositories/price-repository.js';
-import { ServiceContainer } from '../../../shared/di/container.js';
+import { ItemRepository } from '../../../workspaces/shared/repositories/item-repository.js';
+import { UserRepository } from '../../../workspaces/shared/repositories/user-repository.js';
+import { PriceRepository } from '../../../workspaces/shared/repositories/price-repository.js';
+import { ServiceContainer } from '../../../workspaces/shared/di/container.js';
 import { 
   MINECRAFT_TEST_DATA, 
   EpicTestScenarios,

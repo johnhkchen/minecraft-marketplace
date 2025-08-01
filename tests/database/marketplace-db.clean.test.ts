@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { MarketplaceDB } from '../../src/lib/database.js';
+import { MarketplaceDB } from '../../workspaces/frontend/src/lib/database.js';
 import { createTestSeller, createTestItem, createTestListing, createTestTransaction } from '../test-utils.js';
 
 // Configurable test data (prevents hardcoded temporal data issues)

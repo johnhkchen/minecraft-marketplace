@@ -11,8 +11,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ServiceContainer } from '../../shared/di/container.js';
-import { CommunityReportService } from '../../shared/services/community-report-service.js';
+import { ServiceContainer } from '../../workspaces/shared/di/container.js';
+import { CommunityReportService } from '../../workspaces/shared/services/community-report-service.js';
 import { 
   MINECRAFT_TEST_DATA, 
   EpicTestScenarios 

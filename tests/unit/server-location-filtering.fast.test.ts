@@ -6,7 +6,7 @@
 
 import { describe, test, expect, beforeEach } from 'vitest';
 import { setupFastTests, measure, expectFastExecution } from '../utils/fast-test-setup';
-import { MarketplaceApiService } from '../../src/lib/api/marketplace.ts';
+import { MarketplaceApiService } from '../../workspaces/frontend/src/lib/api/marketplace.ts';
 
 // Setup MSW mocking for instant responses
 setupFastTests();

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { loadHomepageData } from '../../src/lib/homepage-data.ts';
+import { loadHomepageData } from '../../workspaces/frontend/src/lib/homepage-data.ts';
 
 describe('Homepage Data Integration - TDD', () => {
   describe('Homepage data loading', () => {

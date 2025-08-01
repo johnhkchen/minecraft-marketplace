@@ -4,7 +4,7 @@
  * Provides a readable, composable way to create test user data for various scenarios.
  */
 
-import type { User, UserRole } from '../../shared/types/service-interfaces.js';
+import type { User, UserRole } from '../../workspaces/shared/types/service-interfaces.js';
 
 export class UserBuilder {
   private user: Partial<User> = {};

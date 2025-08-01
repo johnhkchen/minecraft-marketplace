@@ -386,7 +386,7 @@ describe('Test Infrastructure Quality', () => {
       expect(configContent).toContain('fast');
     } catch {
       // Fallback: check for regular vitest config
-      const vitestConfig = join(PROJECT_ROOT, 'vitest.config.ts');
+      const vitestConfig = join(PROJECT_ROOT, 'config/testing/vitest.config.ts');
       await access(vitestConfig);
     }
   });

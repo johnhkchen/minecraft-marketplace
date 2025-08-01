@@ -310,7 +310,7 @@ describe('Test Infrastructure Validation', () => {
   });
 
   it('validates test configuration files exist', async () => {
-    const vitestConfig = join(PROJECT_ROOT, 'vitest.config.ts');
+    const vitestConfig = join(PROJECT_ROOT, 'config/testing/vitest.config.ts');
     const vitestFastConfig = join(PROJECT_ROOT, 'vitest.fast.config.ts');
     
     try {

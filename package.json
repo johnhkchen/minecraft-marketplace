@@ -75,6 +75,7 @@
     "validate": "npm run test-pipeline"
   },
   "dependencies": {
+    "@testing-library/user-event": "^14.6.1",
     "tsx": "^4.20.3",
     "uuid": "^11.0.3"
   },
