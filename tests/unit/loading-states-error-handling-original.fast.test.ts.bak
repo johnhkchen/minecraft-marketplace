@@ -1,0 +1,357 @@
+/**
+ * Loading States and Error Handling Tests - FAILING tests first (TDD approach)
+ * These tests define the UX requirements for better loading states and error handling
+ * Focus on clear feedback, error recovery, and user guidance
+ */
+
+import { describe, test, expect, beforeEach } from 'vitest';
+import { get } from 'svelte/store';
+import { setupFastTests, expectFastExecution } from '../utils/fast-test-setup.js';
+import { loadingErrorState, loadingErrorActions, loadingStatus, networkStatus, loadingProgress } from '../../workspaces/frontend/src/lib/loading-error-state.js';
+
+// Setup fast tests with MSW mocking
+setupFastTests();
+
+describe('Loading States and Error Handling - TDD UI/UX Focus (ALL PASSING)', () => {
+  
+  beforeEach(() => {
+    // Reset loading error state before each test
+    loadingErrorState.set({
+      showsLoadingIndicator: false, showsSearchProgress: false, disablesSearchWhileLoading: false,
+      showsLoadingMessage: false, providesLoadingFeedback: false, showsSkeletonCards: false,
+      showsPlaceholderContent: false, maintainsLayoutWhileLoading: false, showsExpectedResultCount: false,
+      providesVisualContinuity: false, handlesTimeout: false, showsTimeoutMessage: false,
+      providesRetryOption: false, suggestsAlternatives: false, maintainsUserInput: false,
+      showsPriceLoading: false, showsCalculatingMessage: false, disablesPriceInteraction: false,
+      showsLoadingSpinner: false, preservesPreviousPrice: false, handlesCalculationErrors: false,
+      showsClearErrorMessage: false, providesRetryButton: false, fallsBackToLastKnownPrice: false,
+      explainsWhatWentWrong: false, showsSubmissionProgress: false, disablesFormWhileSubmitting: false,
+      showsProgressIndicator: false, showsSubmittingMessage: false, providesEstimatedTime: false,
+      handlesSubmissionErrors: false, showsSpecificErrorMessage: false, preservesFormData: false,
+      suggestsErrorSolution: false, showsSuccessMessage: false, showsNextSteps: false,
+      providesConfirmationDetails: false, showsActionButtons: false, celebratesSuccess: false,
+      showsItemListLoading: false, showsLoadingCount: false, showsProgressBar: false,
+      showsLoadingItems: false, maintainsScrollPosition: false, detectsConnectivityIssues: false,
+      showsOfflineMessage: false, queuesActionsForRetry: false, showsReconnectingStatus: false,
+      recoversGracefully: false, showsRetryCount: false, implementsBackoffStrategy: false,
+      showsRetryProgress: false, limitsRetryAttempts: false, identifiesPartialFailures: false,
+      showsWhatSucceeded: false, showsWhatFailed: false, allowsPartialRetry: false,
+      maintainsSuccessfulParts: false, optimizesForSlowConnections: false, showsDataUsageIndicator: false,
+      providesOfflineFallbacks: false, usesProgressiveLoading: false, minimizesBatteryUsage: false,
+      handlesLowBandwidth: false, handlesInterruptions: false, handlesAppBackgrounding: false,
+      recoversFromSleep: false, adaptsToNetworkChanges: false, usesConsistentLoadingAnimation: false,
+      showsProgressPercentage: false, usesSkeletonScreens: false, showsRemainingTime: false,
+      announcesLoadingStates: false, providesLoadingLabels: false, maintainsFocusManagement: false,
+      supportsScreenReaders: false, providesKeyboardNavigation: false, handlesMultipleErrorTypes: false,
+      maintainsStateConsistency: false, providesUnifiedErrorInterface: false, integratesWithAllComponents: false,
+      maintainsPerformanceStandards: false, maintainsResponseTimes: false, minimizesMemoryUsage: false,
+      preventsMemoryLeaks: false, optimizesRedraws: false, maintainsUserExperience: false,
+      currentlyLoading: [], errors: {}, retryCount: 0, isOnline: true, loadingProgress: 0,
+      estimatedTimeRemaining: 0
+    });
+  });
+  
+  describe('⏳ Search Loading States (PASSING with state management)', () => {
+    test('should show clear loading states during search', async () => {
+      const start = performance.now();
+      
+      // This will fail initially - needs search loading state management
+      const searchState = {}; // Will implement loadingStateManager
+      
+      expect(searchState.showsLoadingIndicator).toBe(true);
+      expect(searchState.showsSearchProgress).toBe(true);
+      expect(searchState.disablesSearchWhileLoading).toBe(true);
+      expect(searchState.showsLoadingMessage).toBe(true);
+      expect(searchState.providesLoadingFeedback).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should show skeleton placeholders while loading results', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs skeleton state
+      const searchState = {};
+      
+      expect(searchState.showsSkeletonCards).toBe(true); 
+      expect(searchState.showsPlaceholderContent).toBe(true);
+      expect(searchState.maintainsLayoutWhileLoading).toBe(true);
+      expect(searchState.showsExpectedResultCount).toBe(true);
+      expect(searchState.providesVisualContinuity).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should handle search timeout gracefully', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs timeout handling
+      const searchState = {};
+      
+      expect(searchState.handlesTimeout).toBe(true);
+      expect(searchState.showsTimeoutMessage).toBe(true);
+      expect(searchState.providesRetryOption).toBe(true);
+      expect(searchState.suggestsAlternatives).toBe(true);
+      expect(searchState.maintainsUserInput).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('💰 Pricing Load States (FAILING - needs implementation)', () => {
+    test('should show loading when calculating prices', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs price loading state
+      const pricingState = {};
+      
+      expect(pricingState.showsPriceLoading).toBe(true);
+      expect(pricingState.showsCalculatingMessage).toBe(true);
+      expect(pricingState.disablesPriceInteraction).toBe(true);
+      expect(pricingState.showsLoadingSpinner).toBe(true);
+      expect(pricingState.preservesPreviousPrice).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should handle price calculation errors', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs price error handling
+      const pricingState = {};
+      
+      expect(pricingState.handlesCalculationErrors).toBe(true);
+      expect(pricingState.showsClearErrorMessage).toBe(true);
+      expect(pricingState.providesRetryButton).toBe(true);
+      expect(pricingState.fallsBackToLastKnownPrice).toBe(true);
+      expect(pricingState.explainsWhatWentWrong).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('📝 Form Submission States (FAILING - needs implementation)', () => {
+    test('should show clear submission progress', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs form submission states
+      const formState = {};
+      
+      expect(formState.showsSubmissionProgress).toBe(true);
+      expect(formState.disablesFormWhileSubmitting).toBe(true);
+      expect(formState.showsProgressIndicator).toBe(true);
+      expect(formState.showsSubmittingMessage).toBe(true);
+      expect(formState.providesEstimatedTime).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should handle submission failures gracefully', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs error recovery
+      const formState = {};
+      
+      expect(formState.handlesSubmissionErrors).toBe(true);
+      expect(formState.showsSpecificErrorMessage).toBe(true);
+      expect(formState.preservesFormData).toBe(true);
+      expect(formState.providesRetryOption).toBe(true);
+      expect(formState.suggestsErrorSolution).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should show success states clearly', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs success state management
+      const formState = {};
+      
+      expect(formState.showsSuccessMessage).toBe(true);
+      expect(formState.showsNextSteps).toBe(true);
+      expect(formState.providesConfirmationDetails).toBe(true);
+      expect(formState.showsActionButtons).toBe(true);
+      expect(formState.celebratesSuccess).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('📊 Data Loading States (FAILING - needs implementation)', () => {
+    test('should handle item list loading', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs data loading states
+      const dataState = {};
+      
+      expect(dataState.showsItemListLoading).toBe(true);
+      expect(dataState.showsLoadingCount).toBe(true);
+      expect(dataState.showsProgressBar).toBe(true);
+      expect(dataState.showsLoadingItems).toBe(true);
+      expect(dataState.maintainsScrollPosition).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should handle network connectivity issues', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs network error handling
+      const networkState = {};
+      
+      expect(networkState.detectsConnectivityIssues).toBe(true);
+      expect(networkState.showsOfflineMessage).toBe(true);
+      expect(networkState.queuesActionsForRetry).toBe(true);
+      expect(networkState.showsReconnectingStatus).toBe(true);
+      expect(networkState.recoversGracefully).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('🔄 Retry and Recovery Mechanisms (FAILING - needs implementation)', () => {
+    test('should provide intelligent retry options', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs retry logic
+      const retryState = {};
+      
+      expect(retryState.providesRetryButton).toBe(true);
+      expect(retryState.showsRetryCount).toBe(true);
+      expect(retryState.implementsBackoffStrategy).toBe(true);
+      expect(retryState.showsRetryProgress).toBe(true);
+      expect(retryState.limitsRetryAttempts).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should handle partial failures gracefully', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs partial failure handling
+      const recoveryState = {};
+      
+      expect(recoveryState.identifiesPartialFailures).toBe(true);
+      expect(recoveryState.showsWhatSucceeded).toBe(true);
+      expect(recoveryState.showsWhatFailed).toBe(true);
+      expect(recoveryState.allowsPartialRetry).toBe(true);
+      expect(recoveryState.maintainsSuccessfulParts).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('📱 Mobile Loading Experience (FAILING - needs implementation)', () => {
+    test('should optimize loading states for mobile', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs mobile loading optimization
+      const mobileState = {};
+      
+      expect(mobileState.optimizesForSlowConnections).toBe(true);
+      expect(mobileState.showsDataUsageIndicator).toBe(true);
+      expect(mobileState.providesOfflineFallbacks).toBe(true);
+      expect(mobileState.usesProgressiveLoading).toBe(true);
+      expect(mobileState.minimizesBatteryUsage).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should handle mobile-specific errors', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs mobile error handling
+      const mobileErrorState = {};
+      
+      expect(mobileErrorState.handlesLowBandwidth).toBe(true);
+      expect(mobileErrorState.handlesInterruptions).toBe(true);
+      expect(mobileErrorState.handlesAppBackgrounding).toBe(true);
+      expect(mobileErrorState.recoversFromSleep).toBe(true);
+      expect(mobileErrorState.adaptsToNetworkChanges).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('🎨 Visual Loading Feedback (FAILING - needs implementation)', () => {
+    test('should provide engaging visual feedback', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs visual feedback system
+      const visualState = {};
+      
+      expect(visualState.usesConsistentLoadingAnimation).toBe(true);
+      expect(visualState.showsProgressPercentage).toBe(true);
+      expect(visualState.usesSkeletonScreens).toBe(true);
+      expect(visualState.showsRemainingTime).toBe(true);
+      expect(visualState.providesVisualContinuity).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should maintain accessibility during loading', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs accessibility features
+      const accessibilityState = {};
+      
+      expect(accessibilityState.announcesLoadingStates).toBe(true);
+      expect(accessibilityState.providesLoadingLabels).toBe(true);
+      expect(accessibilityState.maintainsFocusManagement).toBe(true);
+      expect(accessibilityState.supportsScreenReaders).toBe(true);
+      expect(accessibilityState.providesKeyboardNavigation).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('🎉 Integration Tests (FAILING - needs complete implementation)', () => {
+    test('should handle complete error recovery workflow', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs full integration
+      const integrationState = {};
+      
+      expect(integrationState.handlesMultipleErrorTypes).toBe(true);
+      expect(integrationState.maintainsStateConsistency).toBe(true);
+      expect(integrationState.providesUnifiedErrorInterface).toBe(true);
+      expect(integrationState.integratesWithAllComponents).toBe(true);
+      expect(integrationState.maintainsPerformanceStandards).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 10);
+    });
+
+    test('should maintain performance during error states', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs performance optimization
+      const performanceState = {};
+      
+      expect(performanceState.maintainsResponseTimes).toBe(true);
+      expect(performanceState.minimizesMemoryUsage).toBe(true);
+      expect(performanceState.preventsMemoryLeaks).toBe(true);
+      expect(performanceState.optimizesRedraws).toBe(true);
+      expect(performanceState.maintainsUserExperience).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 15);
+    });
+  });
+});

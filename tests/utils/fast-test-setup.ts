@@ -131,6 +131,11 @@ export const fastReport = (overrides = {}) => ({
 // Import realistic dataset from postgrest-handlers
 import { REALISTIC_MARKETPLACE_DATA } from '../mocks/postgrest-handlers.js';
 
+// Import Valkey mocking for fast tests
+import { getMockValkeyService, resetMockValkey } from '../mocks/valkey-mock.js';
+// Note: The correct import would need to be dynamic in tests since the paths are complex
+// Let's handle this differently by making the mock work without path issues
+
 // Helper function to create items handler for any URL
 const createItemsHandler = (endpoint: string) => {
   return http.get(endpoint, ({ request }) => {
@@ -403,16 +408,44 @@ const fastServer = setupServer(...fastHandlers);
 
 // Universal setup - use in any test file
 export const setupFastTests = () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     fastServer.listen({ onUnhandledRequest: 'warn' });
+    
+    // Initialize mock Valkey service for fast tests
+    const mockValkey = getMockValkeyService();
+    await mockValkey.connect();
+    
+    // Set up environment variable to indicate test mode for Valkey mocking
+    process.env.VITEST = 'true';
+    process.env.NODE_ENV = 'test';
+    
+    // Use dynamic import to set the mock after environment is set
+    try {
+      const { setMockValkeyService } = await import('../../workspaces/shared/services/valkey-cache.js');
+      setMockValkeyService(mockValkey);
+      console.log('🧪 Mock Valkey service configured for tests');
+    } catch (error) {
+      console.log('⚠️ Could not set mock Valkey service, tests will use fallback behavior');
+    }
   });
 
   afterEach(() => {
     fastServer.resetHandlers();
+    // Reset Valkey cache between tests to prevent interference
+    resetMockValkey();
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     fastServer.close();
+    // Cleanup mock Valkey service
+    await getMockValkeyService().disconnect();
+    
+    try {
+      const { setMockValkeyService } = await import('../../workspaces/shared/services/valkey-cache.js');
+      setMockValkeyService(null);
+    } catch (error) {
+      // Ignore cleanup errors
+    }
   });
 };
 

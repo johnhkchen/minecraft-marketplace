@@ -6,6 +6,8 @@
 
 **Project Organization**: [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md)
 
+**Phase 1 Enhancement**: [`ENHANCED_HATEOAS_FILTERING_SPEC.md`](./ENHANCED_HATEOAS_FILTERING_SPEC.md)
+
 > **Purpose**: Technical blueprint and file tree organization for Discord-native Minecraft marketplace
 > **Audience**: Developers implementing the system from scratch
 
@@ -18,6 +20,7 @@
 6. **Technical Requirements** - Performance, security, scalability constraints
 7. **Deployment Architecture** - Single-container Docker setup with nginx
 8. **Quality Gates** - Definition of done and success metrics
+9. **Phase 1 Enhancements** - HATEOAS filtering with contextual actions (immediate implementation)
 
 ---
 

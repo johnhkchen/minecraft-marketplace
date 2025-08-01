@@ -1,0 +1,335 @@
+/**
+ * Responsive Design Improvement Tests - FAILING tests first (TDD approach)
+ * These tests define the UX requirements for mobile marketplace usage
+ * Focus on mobile-first design, touch optimization, and adaptive layouts
+ */
+
+import { describe, test, expect, beforeEach } from 'vitest';
+import { get } from 'svelte/store';
+import { setupFastTests, expectFastExecution } from '../utils/fast-test-setup.js';
+
+// Setup fast tests with MSW mocking
+setupFastTests();
+
+describe('Responsive Design Improvement - TDD UI/UX Focus (FAILING FIRST)', () => {
+  
+  describe('📱 Mobile-First Layout (FAILING - needs implementation)', () => {
+    test('should adapt search interface for mobile screens', async () => {
+      const start = performance.now();
+      
+      // This will fail initially - needs responsive search state management
+      const responsiveState = {}; // Will implement responsiveDesignManager
+      
+      expect(responsiveState.adaptsSearchForMobile).toBe(true);
+      expect(responsiveState.usesStackedLayout).toBe(true);
+      expect(responsiveState.enlargesTouchTargets).toBe(true);
+      expect(responsiveState.simplifiesSearchFilters).toBe(true);
+      expect(responsiveState.optimizesKeyboardInput).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should optimize pricing display for small screens', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs mobile pricing layout
+      const responsiveState = {};
+      
+      expect(responsiveState.stacksPricingElements).toBe(true);
+      expect(responsiveState.enlargesPriceText).toBe(true);
+      expect(responsiveState.simplifiesTradingUnits).toBe(true);
+      expect(responsiveState.usesClearDiamondSymbols).toBe(true);
+      expect(responsiveState.optimizesForThumbTapping).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should create mobile-friendly item cards', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs mobile card layout
+      const responsiveState = {};
+      
+      expect(responsiveState.usesFullWidthCards).toBe(true);
+      expect(responsiveState.stacksCardContent).toBe(true);
+      expect(responsiveState.enlargesItemImages).toBe(true);
+      expect(responsiveState.simplifiesCardActions).toBe(true);
+      expect(responsiveState.optimizesCardSpacing).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('👆 Touch Optimization (FAILING - needs implementation)', () => {
+    test('should provide large touch targets for all interactive elements', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs touch optimization
+      const touchState = {};
+      
+      expect(touchState.enlargesButtonsFor44px).toBe(true);
+      expect(touchState.addsTouchPadding).toBe(true);
+      expect(touchState.preventsAccidentalTaps).toBe(true);
+      expect(touchState.providesVisualFeedback).toBe(true);
+      expect(touchState.optimizesForThumbReach).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should handle swipe gestures for navigation', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs gesture handling
+      const gestureState = {};
+      
+      expect(gestureState.enablesSwipeNavigation).toBe(true);
+      expect(gestureState.showsSwipeIndicators).toBe(true);
+      expect(gestureState.handlesPinchZoom).toBe(true);
+      expect(gestureState.providesGestureGuides).toBe(true);
+      expect(gestureState.preventsUnintendedGestures).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should optimize form inputs for mobile keyboards', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs mobile input optimization
+      const inputState = {};
+      
+      expect(inputState.usesAppropriateInputTypes).toBe(true);
+      expect(inputState.enlargesInputFields).toBe(true);
+      expect(inputState.improvesKeyboardNavigation).toBe(true);
+      expect(inputState.preventsZoomOnFocus).toBe(true);
+      expect(inputState.optimizesAutocomplete).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('📐 Adaptive Layout System (FAILING - needs implementation)', () => {
+    test('should detect and respond to screen size changes', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs responsive detection
+      const layoutState = {};
+      
+      expect(layoutState.detectsScreenSize).toBe(true);
+      expect(layoutState.adaptsToOrientation).toBe(true);
+      expect(layoutState.handlesResizeEvents).toBe(true);
+      expect(layoutState.maintainsStateOnRotation).toBe(true);
+      expect(layoutState.optimizesForViewport).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should provide breakpoint-specific layouts', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs breakpoint system
+      const breakpointState = {};
+      
+      expect(breakpointState.definesMobileBreakpoints).toBe(true);
+      expect(breakpointState.definesTabletBreakpoints).toBe(true);
+      expect(breakpointState.definesDesktopBreakpoints).toBe(true);
+      expect(breakpointState.smoothlyTransitionsBetween).toBe(true);
+      expect(breakpointState.maintainsUsability).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should adapt navigation for different screen sizes', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs responsive navigation
+      const navigationState = {};
+      
+      expect(navigationState.collapsesToHamburger).toBe(true);
+      expect(navigationState.prioritizesImportantActions).toBe(true);
+      expect(navigationState.usesBottomNavigation).toBe(true);
+      expect(navigationState.providesEasyAccess).toBe(true);
+      expect(navigationState.maintainsConsistentUX).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('🎨 Mobile Typography and Spacing (FAILING - needs implementation)', () => {
+    test('should scale typography appropriately for mobile', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs typography scaling
+      const typographyState = {};
+      
+      expect(typographyState.usesMinimum16pxText).toBe(true);
+      expect(typographyState.improvesLineHeight).toBe(true);
+      expect(typographyState.optimizesTextContrast).toBe(true);
+      expect(typographyState.adaptsToUserPreferences).toBe(true);
+      expect(typographyState.maintainsReadability).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should provide appropriate spacing for mobile interaction', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs spacing optimization
+      const spacingState = {};
+      
+      expect(spacingState.increasesElementSpacing).toBe(true);
+      expect(spacingState.improvesTouchableAreaSpacing).toBe(true);
+      expect(spacingState.optimizesContentDensity).toBe(true);
+      expect(spacingState.balancesWhitespace).toBe(true);
+      expect(spacingState.preventsAccidentalTaps).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('🔄 Performance Optimization for Mobile (FAILING - needs implementation)', () => {
+    test('should optimize loading for slower mobile connections', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs mobile performance optimization
+      const performanceState = {};
+      
+      expect(performanceState.lazyLoadsImages).toBe(true);
+      expect(performanceState.compressesImageAssets).toBe(true);
+      expect(performanceState.prioritizesCriticalContent).toBe(true);
+      expect(performanceState.minimizesInitialBundle).toBe(true);
+      expect(performanceState.cachesEffectively).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should minimize battery usage on mobile devices', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs battery optimization
+      const batteryState = {};
+      
+      expect(batteryState.reducesCPUIntensiveOperations).toBe(true);
+      expect(batteryState.optimizesAnimations).toBe(true);
+      expect(batteryState.minimizesNetworkRequests).toBe(true);
+      expect(batteryState.debounceUserInput).toBe(true);
+      expect(batteryState.usesPowerEfficientPatterns).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('🌐 Progressive Web App Features (FAILING - needs implementation)', () => {
+    test('should provide offline functionality', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs PWA features
+      const pwaState = {};
+      
+      expect(pwaState.cachesEssentialPages).toBe(true);
+      expect(pwaState.providesOfflineIndicators).toBe(true);
+      expect(pwaState.syncsBehaviorWhenOnline).toBe(true);
+      expect(pwaState.maintainsBasicFunctionality).toBe(true);
+      expect(pwaState.gracefullyHandlesOffline).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should support installation as mobile app', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs app installation features
+      const installState = {};
+      
+      expect(installState.providesWebAppManifest).toBe(true);
+      expect(installState.showsInstallPrompt).toBe(true);
+      expect(installState.supportsAppIcons).toBe(true);
+      expect(installState.enablesFullscreenMode).toBe(true);
+      expect(installState.integratesWithMobileOS).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('♿ Mobile Accessibility (FAILING - needs implementation)', () => {
+    test('should support mobile screen readers', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs mobile accessibility
+      const accessibilityState = {};
+      
+      expect(accessibilityState.providesProperARIALabels).toBe(true);
+      expect(accessibilityState.supportsTalkBackVoiceOver).toBe(true);
+      expect(accessibilityState.optimizesHeadingStructure).toBe(true);
+      expect(accessibilityState.providesSkipNavigation).toBe(true);
+      expect(accessibilityState.maintainsFocusManagement).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+
+    test('should support mobile accessibility preferences', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs accessibility preferences
+      const preferencesState = {};
+      
+      expect(preferencesState.respectsReducedMotion).toBe(true);
+      expect(preferencesState.supportsHighContrast).toBe(true);
+      expect(preferencesState.allowsTextScaling).toBe(true);
+      expect(preferencesState.adaptsToColorBlindness).toBe(true);
+      expect(preferencesState.providesAlternativeInteractions).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 5);
+    });
+  });
+
+  describe('🎉 Integration Tests (FAILING - needs complete implementation)', () => {
+    test('should handle complete mobile workflow', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs full mobile integration
+      const integrationState = {};
+      
+      expect(integrationState.handlesSearchToCheckout).toBe(true);
+      expect(integrationState.maintainsStateAcrossScreens).toBe(true);
+      expect(integrationState.adaptsToAllMobileDevices).toBe(true);
+      expect(integrationState.providesConsistentExperience).toBe(true);
+      expect(integrationState.maintainsPerformanceStandards).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 10);
+    });
+
+    test('should maintain usability across all mobile contexts', async () => {
+      const start = performance.now();
+      
+      // This will fail - needs comprehensive mobile support
+      const usabilityState = {};
+      
+      expect(usabilityState.worksInDirectSunlight).toBe(true);
+      expect(usabilityState.functionsWithGloves).toBe(true);
+      expect(usabilityState.adaptsToOneHandedUse).toBe(true);
+      expect(usabilityState.minimizesDataUsage).toBe(true);
+      expect(usabilityState.maximizesBatteryLife).toBe(true);
+      
+      const timeMs = performance.now() - start;
+      expectFastExecution(timeMs, 15);
+    });
+  });
+});

@@ -144,6 +144,8 @@ services:
   valkey:
     image: valkey/valkey:8.1-alpine
     container_name: minecraft-marketplace-valkey
+    ports:
+      - "6379:6379"
     volumes:
       - valkey_data:/data
     restart: unless-stopped

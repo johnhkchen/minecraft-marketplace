@@ -23,7 +23,9 @@ export default defineConfig(
         'tests/unit/temporal-decoupling.test.ts',
         'tests/unit/discord-integration.consolidated.fast.test.ts', 
         'tests/unit/community-reporting.consolidated.fast.test.ts',
-        'tests/validation/**/*.test.ts'
+        'tests/unit/valkey-environment-coverage.test.ts', // Valkey environment tests
+        'tests/validation/**/*.test.ts',
+        'tests/valkey-test-suite.test.ts' // Valkey test suite coordination
       ],
       exclude: [
         'tests/integration/**',

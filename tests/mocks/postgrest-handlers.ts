@@ -27,7 +27,7 @@ const TEMPORAL_ENDPOINTS = {
   health: `${BASE_URL}/api/health`
 };
 
-// EVERGREEN - Mock data factories following PostgREST response format
+// EVERGREEN - Mock data factories following PostgREST response format with enhanced fields
 const mockItem = (overrides = {}) => ({
   id: 'item_123',
   owner_id: 'user_123',
@@ -39,6 +39,16 @@ const mockItem = (overrides = {}) => ({
   stock_quantity: 5,
   is_available: true,
   created_at: '2025-01-01T00:00:00Z',
+  // Enhanced fields with defaults
+  biome: 'plains',
+  direction: 'north',
+  warp_command: '/warp diamondsword',
+  coordinates_x: 0,
+  coordinates_z: 0,
+  confidence_level: 'medium',
+  last_verified: null,
+  verified_by: null,
+  owner_shop_name: 'Test Shop',
   ...overrides
 });
 
@@ -56,15 +66,32 @@ const mockUser = (overrides = {}) => ({
 // REALISTIC DATASET - 55 items from 7 shops matching real marketplace data
 const REALISTIC_MARKETPLACE_DATA = [
   // Blocks & Materials
-  mockItem({ id: 'item_001', name: 'Iron Blocks', category: 'blocks', price_diamonds: 288.00, trading_unit: 'per_shulker', stock_quantity: 27, owner_shop_name: 'General Trading Post' }),
+  mockItem({ 
+    id: 'item_001', 
+    name: 'Iron Blocks', 
+    category: 'blocks', 
+    price_diamonds: 288.00, 
+    trading_unit: 'per_shulker', 
+    stock_quantity: 27, 
+    owner_shop_name: 'General Trading Post',
+    // Enhanced fields
+    biome: 'mountains',
+    direction: 'north',
+    warp_command: '/warp ironblocks',
+    coordinates_x: 150,
+    coordinates_z: -200,
+    confidence_level: 'high',
+    last_verified: '2025-01-01T10:00:00Z',
+    verified_by: 'moderator_steve'
+  }),
   mockItem({ id: 'item_002', name: 'Gilded Blackstone', category: 'blocks', price_diamonds: 12.8, trading_unit: 'per_stack', stock_quantity: 102, owner_shop_name: 'Nether Materials Co' }),
   mockItem({ id: 'item_003', name: 'Obsidian', category: 'blocks', price_diamonds: 4, trading_unit: 'per_stack', stock_quantity: 49, owner_shop_name: 'Nether Materials Co' }),
   mockItem({ id: 'item_004', name: 'Crying Obsidian', category: 'blocks', price_diamonds: 4, trading_unit: 'per_stack', stock_quantity: 0, owner_shop_name: 'Nether Materials Co', is_available: false }),
   mockItem({ id: 'item_005', name: 'Wool', category: 'blocks', price_diamonds: 9.00, trading_unit: 'per_shulker', stock_quantity: 100, owner_shop_name: 'Wool Warehouse' }),
   
   // Transportation (Elytra) - High value items
-  mockItem({ id: 'item_006', name: 'Normal Elytra', category: 'misc', price_diamonds: 162.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Elytra Emporium' }),
-  mockItem({ id: 'item_007', name: 'Enchanted Elytra', category: 'misc', price_diamonds: 207.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Elytra Emporium' }),
+  mockItem({ id: 'item_006', name: 'Normal Elytra', category: 'misc', price_diamonds: 162.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Elytra Emporium', last_verified: '2025-01-01T12:00:00Z', verified_by: 'admin_alex' }),
+  mockItem({ id: 'item_007', name: 'Enchanted Elytra', category: 'misc', price_diamonds: 207.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Elytra Emporium', last_verified: '2025-01-01T11:30:00Z', verified_by: 'moderator_notch' }),
   mockItem({ id: 'item_008', name: 'Regular Elytra', category: 'misc', price_diamonds: 252.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Ultimate Gear Shop' }),
   mockItem({ id: 'item_009', name: 'Enchanted Cape', category: 'misc', price_diamonds: 270.00, trading_unit: 'per_item', stock_quantity: 3, owner_shop_name: 'Ultimate Gear Shop' }),
   mockItem({ id: 'item_010', name: 'Mythical Cape', category: 'misc', price_diamonds: 576.00, trading_unit: 'per_item', stock_quantity: 1, owner_shop_name: 'Ultimate Gear Shop' }),
@@ -116,10 +143,43 @@ const REALISTIC_MARKETPLACE_DATA = [
   mockItem({ id: 'item_042', name: 'Soul Speed II Book', category: 'misc', price_diamonds: 4.00, trading_unit: 'per_item', stock_quantity: 42, owner_shop_name: 'Nether Materials Co' }),
   mockItem({ id: 'item_043', name: 'Soul Speed I Book', category: 'misc', price_diamonds: 2.00, trading_unit: 'per_item', stock_quantity: 48, owner_shop_name: 'Nether Materials Co' }),
   
-  // Wood & Logs (from _Pythos692016)
-  mockItem({ id: 'item_044', name: 'Dark Oak Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 2, owner_shop_name: 'Wood & Amethyst Trader' }),
-  mockItem({ id: 'item_045', name: 'Pale Oak Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
-  mockItem({ id: 'item_046', name: 'Oak Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
+  // Wood & Logs (from _Pythos692016) - Set these as jungle biome
+  mockItem({ 
+    id: 'item_044', 
+    name: 'Dark Oak Logs', 
+    category: 'blocks', 
+    price_diamonds: 18.00, 
+    trading_unit: 'per_shulker', 
+    stock_quantity: 2, 
+    owner_shop_name: 'Wood & Amethyst Trader',
+    biome: 'jungle',
+    direction: 'south',
+    warp_command: '/warp darkoaklogs'
+  }),
+  mockItem({ 
+    id: 'item_045', 
+    name: 'Pale Oak Logs', 
+    category: 'blocks', 
+    price_diamonds: 18.00, 
+    trading_unit: 'per_shulker', 
+    stock_quantity: 1, 
+    owner_shop_name: 'Wood & Amethyst Trader',
+    biome: 'jungle',
+    direction: 'east',
+    warp_command: '/warp paleoaklogs'
+  }),
+  mockItem({ 
+    id: 'item_046', 
+    name: 'Oak Logs', 
+    category: 'blocks', 
+    price_diamonds: 18.00, 
+    trading_unit: 'per_shulker', 
+    stock_quantity: 1, 
+    owner_shop_name: 'Wood & Amethyst Trader',
+    biome: 'jungle',
+    direction: 'west',
+    warp_command: '/warp oaklogs'
+  }),
   mockItem({ id: 'item_047', name: 'Cherry Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
   mockItem({ id: 'item_048', name: 'Spruce Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
   mockItem({ id: 'item_049', name: 'Birch Logs', category: 'blocks', price_diamonds: 18.00, trading_unit: 'per_shulker', stock_quantity: 1, owner_shop_name: 'Wood & Amethyst Trader' }),
@@ -137,6 +197,7 @@ const REALISTIC_MARKETPLACE_DATA = [
 const createPublicItemsHandler = (baseUrl: string) => {
   return http.get(`${baseUrl}/api/data/public_items`, ({ request }) => {
     const url = new URL(request.url);
+    console.log(`🎯 MSW Handler called: ${url.toString()}`);
     
     // Use realistic dataset - all 55 items from 7 shops
     let items = [...REALISTIC_MARKETPLACE_DATA];
@@ -146,6 +207,63 @@ const createPublicItemsHandler = (baseUrl: string) => {
     const offset = url.searchParams.get('offset') || '0';
     const order = url.searchParams.get('order');
     const select = url.searchParams.get('select');
+    
+    // Handle enhanced filtering
+    const biome = url.searchParams.get('biome')?.replace('eq.', '');
+    const direction = url.searchParams.get('direction')?.replace('eq.', '');
+    const category = url.searchParams.get('category')?.replace('eq.', '');
+    const nameSearch = url.searchParams.get('name');
+    
+    // Handle price range filtering
+    let minPrice, maxPrice;
+    const priceParams = url.searchParams.getAll('price_diamonds');
+    for (const priceParam of priceParams) {
+      if (priceParam.startsWith('gte.')) {
+        minPrice = parseFloat(priceParam.replace('gte.', ''));
+      }
+      if (priceParam.startsWith('lte.')) {
+        maxPrice = parseFloat(priceParam.replace('lte.', ''));
+      }
+    }
+    
+    // Handle verification filtering
+    const lastVerified = url.searchParams.get('last_verified');
+    let verificationFilter = null;
+    if (lastVerified === 'not.is.null') {
+      verificationFilter = 'verified';
+    } else if (lastVerified === 'is.null') {
+      verificationFilter = 'unverified';
+    }
+    
+    // Apply filters before ordering
+    if (biome) {
+      items = items.filter(item => item.biome === biome);
+    }
+    if (direction) {
+      items = items.filter(item => item.direction === direction);
+    }
+    if (category) {
+      items = items.filter(item => item.category === category);
+    }
+    if (nameSearch && nameSearch.includes('ilike')) {
+      const searchTerm = nameSearch.replace('ilike.*', '').replace('*', '').toLowerCase();
+      items = items.filter(item => item.name.toLowerCase().includes(searchTerm));
+    }
+    
+    // Apply price range filtering
+    if (minPrice !== undefined) {
+      items = items.filter(item => item.price_diamonds >= minPrice);
+    }
+    if (maxPrice !== undefined) {
+      items = items.filter(item => item.price_diamonds <= maxPrice);
+    }
+    
+    // Apply verification filtering
+    if (verificationFilter === 'verified') {
+      items = items.filter(item => item.last_verified != null);
+    } else if (verificationFilter === 'unverified') {
+      items = items.filter(item => item.last_verified == null);
+    }
     
     // Apply ordering
     if (order === 'price_diamonds.desc') {
