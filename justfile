@@ -48,6 +48,58 @@ nix-dev:
 test:
     npm test
 
+# Run Playwright E2E tests with proper setup
+test-e2e:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    echo "🎭 Running Playwright E2E Tests"
+    echo "==============================="
+    echo ""
+    echo "   ✅ OUTCOME: Complete shop dashboard workflow validation"
+    echo "   🎯 PURPOSE: Test user journeys and critical functionality"
+    echo "   📋 SCOPE: Login, dashboard, inventory management, mobile experience"
+    echo ""
+    
+    # Check if development server is already running
+    if curl -f -s http://localhost:4321 > /dev/null 2>&1; then
+        echo "✅ Development server is already running at http://localhost:4321"
+        echo "🧪 Running E2E tests against existing server..."
+        npx playwright test
+    else
+        echo "🚀 Starting development server and running E2E tests..."
+        echo "💡 This will start the frontend dev server automatically"
+        npx playwright test
+    fi
+
+# Run E2E tests with UI for debugging
+test-e2e-ui:
+    #!/usr/bin/env bash
+    echo "🎭 Running Playwright E2E Tests with UI"
+    echo "🔧 This opens the Playwright Test Runner for interactive debugging"
+    echo ""
+    npx playwright test --ui
+
+# Run E2E tests in headed mode (visible browser)
+test-e2e-headed:
+    #!/usr/bin/env bash
+    echo "🎭 Running Playwright E2E Tests (Headed Mode)"
+    echo "👀 Browser windows will be visible during test execution"
+    echo ""
+    npx playwright test --headed
+
+# Install Playwright browsers (run once)
+install-browsers:
+    #!/usr/bin/env bash
+    echo "📦 Installing Playwright Browsers"
+    echo "================================="
+    echo ""
+    echo "   ✅ OUTCOME: Chromium, Firefox, and WebKit will be installed"
+    echo "   📋 REQUIRED: Run this once before E2E tests"
+    echo "   ⏱️  ESTIMATED TIME: 2-3 minutes"
+    echo ""
+    npx playwright install
+
 # Run tests with UI
 test-ui:
     npm run test:ui

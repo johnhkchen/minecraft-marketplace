@@ -1,0 +1,387 @@
+---
+/**
+ * Login Page  
+ * Discord OAuth integration for shop owners and users
+ * Provides clear authentication flow with dashboard integration
+ */
+
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Login - Minecraft Marketplace">
+  <main class="login-page">
+    <div class="login-container">
+      <div class="login-header">
+        <h1>Welcome to Minecraft Marketplace</h1>
+        <p>Connect with Discord to access your shop dashboard and start trading</p>
+      </div>
+      
+      <div class="login-options">
+        <div class="shop-owner-login">
+          <h2>Shop Owners</h2>
+          <p>Manage your inventory, track sales, and connect with the community</p>
+          
+          <button 
+            class="discord-login-btn primary"
+            data-testid="discord-login-btn"
+            id="shop-owner-login"
+          >
+            <span class="discord-icon">🎮</span>
+            Login with Discord
+          </button>
+          
+          <div class="login-benefits">
+            <ul>
+              <li>📊 Comprehensive shop analytics</li>
+              <li>📦 Easy inventory management</li>
+              <li>💰 Price optimization tools</li>
+              <li>🔔 Smart stock alerts</li>
+              <li>📱 Mobile-friendly dashboard</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="buyer-login">
+          <h2>Buyers & Traders</h2>
+          <p>Browse items, compare prices, and submit community reports</p>
+          
+          <button 
+            class="discord-login-btn secondary"
+            data-testid="buyer-login-btn"
+            id="buyer-login"
+          >
+            <span class="discord-icon">🎮</span>
+            Login with Discord  
+          </button>
+          
+          <div class="login-benefits">
+            <ul>
+              <li>🔍 Advanced item search</li>
+              <li>💎 Real-time price comparison</li>
+              <li>📋 Community reporting system</li>
+              <li>⭐ Shop reputation scores</li>
+              <li>🚀 Priority notifications</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="security-info">
+        <h3>🔒 Secure & Private</h3>
+        <p>
+          We only access your Discord username and ID. No personal information 
+          is stored or shared. You can revoke access anytime through Discord settings.
+        </p>
+      </div>
+      
+      <div class="demo-access">
+        <h3>🎯 Try Without Login</h3>
+        <p>Explore the marketplace as a guest (limited features)</p>
+        <a href="/marketplace" class="demo-link">Browse Marketplace</a>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  // Discord OAuth configuration (would be environment variables in production)
+  const DISCORD_CLIENT_ID = 'your_discord_client_id';
+  const REDIRECT_URI = encodeURIComponent(window.location.origin + '/auth/callback');
+  const DISCORD_OAUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify`;
+  
+  // Handle shop owner login
+  document.getElementById('shop-owner-login')?.addEventListener('click', () => {
+    // Store user type for post-auth routing
+    localStorage.setItem('user_type', 'shop_owner');
+    
+    // For demo purposes, simulate Discord login and redirect to dashboard
+    if (import.meta.env.DEV || window.location.hostname === 'localhost') {
+      // Development mode - simulate successful auth
+      console.log('🎮 Simulating Discord OAuth for development...');
+      
+      // Mock successful authentication
+      const mockUser = {
+        id: 'discord_123456',
+        username: 'Steve',
+        discriminator: '0001'
+      };
+      
+      // Store mock session
+      localStorage.setItem('discord_user', JSON.stringify(mockUser));
+      localStorage.setItem('user_type', 'shop_owner');
+      
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
+    } else {
+      // Production mode - real Discord OAuth
+      window.location.href = DISCORD_OAUTH_URL + '&state=shop_owner';
+    }
+  });
+  
+  // Handle buyer login  
+  document.getElementById('buyer-login')?.addEventListener('click', () => {
+    localStorage.setItem('user_type', 'buyer');
+    
+    if (import.meta.env.DEV || window.location.hostname === 'localhost') {
+      // Development mode - simulate successful auth
+      console.log('🎮 Simulating Discord OAuth for buyer...');
+      
+      const mockUser = {
+        id: 'discord_buyer_789',
+        username: 'Alex',
+        discriminator: '0002'
+      };
+      
+      localStorage.setItem('discord_user', JSON.stringify(mockUser));
+      localStorage.setItem('user_type', 'buyer');
+      
+      // Redirect to marketplace
+      window.location.href = '/marketplace';
+    } else {
+      // Production mode - real Discord OAuth
+      window.location.href = DISCORD_OAUTH_URL + '&state=buyer';
+    }
+  });
+  
+  // Check if already logged in
+  const storedUser = localStorage.getItem('discord_user');
+  const userType = localStorage.getItem('user_type');
+  
+  if (storedUser && userType) {
+    // User is already logged in, redirect appropriately
+    if (userType === 'shop_owner') {
+      window.location.href = '/dashboard';
+    } else {
+      window.location.href = '/marketplace';
+    }
+  }
+</script>
+
+<style>
+  .login-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  .login-container {
+    background: white;
+    border-radius: 1rem;
+    padding: 3rem;
+    max-width: 800px;
+    width: 100%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .login-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .login-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 1rem 0;
+  }
+  
+  .login-header p {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin: 0;
+  }
+  
+  .login-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+  
+  .shop-owner-login, .buyer-login {
+    text-align: center;
+  }
+  
+  .shop-owner-login h2, .buyer-login h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .shop-owner-login p, .buyer-login p {
+    color: #6b7280;
+    margin: 0 0 2rem 0;
+  }
+  
+  .discord-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    margin-bottom: 2rem;
+  }
+  
+  .discord-login-btn.primary {
+    background: #5865f2;
+    color: white;
+  }
+  
+  .discord-login-btn.primary:hover {
+    background: #4752c4;
+    transform: translateY(-1px);
+  }
+  
+  .discord-login-btn.secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 2px solid #d1d5db;
+  }
+  
+  .discord-login-btn.secondary:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+    transform: translateY(-1px);
+  }
+  
+  .discord-icon {
+    font-size: 1.5rem;
+  }
+  
+  .login-benefits {
+    text-align: left;
+  }
+  
+  .login-benefits ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .login-benefits li {
+    padding: 0.5rem 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+  
+  .security-info {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .security-info h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #065f46;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .security-info p {
+    color: #047857;
+    margin: 0;
+    font-size: 0.875rem;
+  }
+  
+  .demo-access {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .demo-access h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .demo-access p {
+    color: #6b7280;
+    margin: 0 0 1rem 0;
+    font-size: 0.875rem;
+  }
+  
+  .demo-link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #f3f4f6;
+    color: #374151;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .demo-link:hover {
+    background: #e5e7eb;
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .login-page {
+      padding: 1rem;
+    }
+    
+    .login-container {
+      padding: 2rem;
+    }
+    
+    .login-header h1 {
+      font-size: 2rem;
+    }
+    
+    .login-options {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    
+    .discord-login-btn {
+      font-size: 1rem;
+      padding: 1.25rem 1.5rem; /* Larger touch target */
+    }
+  }
+  
+  /* Accessibility improvements */
+  .discord-login-btn:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .discord-login-btn {
+      transition: none;
+    }
+    
+    .discord-login-btn:hover {
+      transform: none;
+    }
+  }
+  
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .login-container {
+      border: 2px solid #000;
+    }
+    
+    .discord-login-btn.secondary {
+      border-width: 3px;
+    }
+  }
+</style>

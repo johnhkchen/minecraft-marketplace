@@ -1,0 +1,44 @@
+---
+/**
+ * Shop Dashboard Page
+ * Main entry point for shop owners to manage their inventory
+ * Integrates with Discord authentication and marketplace systems
+ */
+
+import Layout from '../layouts/Layout.astro';
+import ShopDashboard from '../components/ShopDashboard.svelte';
+
+// Mock shop owner data (would come from session/auth in real implementation)
+const shopOwner = {
+  id: 'discord_123456',
+  name: 'Steve', 
+  shopName: 'Steve\'s Diamond Shop'
+};
+
+const title = `${shopOwner.shopName} - Dashboard`;
+---
+
+<Layout title={title}>
+  <main class="dashboard-page">
+    <ShopDashboard 
+      shopOwner={shopOwner}
+      client:load
+    />
+  </main>
+</Layout>
+
+<style>
+  .dashboard-page {
+    min-height: 100vh;
+    background: #f9fafb;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Ensure proper spacing on mobile */
+  @media (max-width: 768px) {
+    .dashboard-page {
+      padding: 0;
+    }
+  }
+</style>
