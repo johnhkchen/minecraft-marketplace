@@ -1,0 +1,210 @@
+---
+/**
+ * Main Layout Component
+ * Extends BaseLayout with marketplace-specific navigation and structure
+ */
+
+import BaseLayout from './BaseLayout.astro';
+
+export interface Props {
+  title: string;
+  description?: string;
+  showNavigation?: boolean;
+}
+
+const { 
+  title, 
+  description = "Discord-native Minecraft marketplace with community-driven pricing",
+  showNavigation = true 
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  {showNavigation && (
+    <nav class="main-navigation">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <a href="/" class="brand-link">
+            <span class="brand-icon">⛏️</span>
+            <span class="brand-text">Minecraft Marketplace</span>
+          </a>
+        </div>
+        
+        <div class="nav-links">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/marketplace" class="nav-link">Browse</a>
+          <a href="/dashboard" class="nav-link">Dashboard</a>
+          <a href="/login" class="nav-link btn-primary">Login</a>
+        </div>
+      </div>
+    </nav>
+  )}
+  
+  <slot />
+  
+  {showNavigation && (
+    <footer class="main-footer">
+      <div class="footer-container">
+        <div class="footer-content">
+          <p>&copy; 2024 Minecraft Marketplace. Community-driven trading platform.</p>
+          <div class="footer-links">
+            <a href="/docs" class="footer-link">API Docs</a>
+            <a href="/privacy" class="footer-link">Privacy</a>
+            <a href="/terms" class="footer-link">Terms</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )}
+</BaseLayout>
+
+<style>
+  .main-navigation {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid var(--color-secondary);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 4rem;
+  }
+  
+  .nav-brand {
+    display: flex;
+    align-items: center;
+  }
+  
+  .brand-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--color-primary);
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  
+  .brand-icon {
+    font-size: 1.5rem;
+  }
+  
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  .nav-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+  }
+  
+  .nav-link:hover {
+    color: var(--color-primary);
+  }
+  
+  .nav-link.btn-primary {
+    background: var(--color-accent);
+    color: white;
+  }
+  
+  .nav-link.btn-primary:hover {
+    background: #45a049;
+    color: white;
+  }
+  
+  .main-footer {
+    background: var(--color-bg-secondary);
+    border-top: 2px solid var(--color-secondary);
+    margin-top: auto;
+  }
+  
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .footer-content p {
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+  
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .footer-link {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s ease;
+  }
+  
+  .footer-link:hover {
+    color: var(--color-primary);
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .nav-container {
+      flex-direction: column;
+      height: auto;
+      padding: 1rem;
+      gap: 1rem;
+    }
+    
+    .nav-links {
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .footer-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+    }
+    
+    .footer-links {
+      justify-content: center;
+    }
+  }
+  
+  /* Ensure main content has minimum height */
+  :global(html) {
+    height: 100%;
+  }
+  
+  :global(body) {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  :global(main) {
+    flex: 1;
+  }
+</style>

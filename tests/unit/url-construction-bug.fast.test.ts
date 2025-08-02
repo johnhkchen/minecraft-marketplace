@@ -6,13 +6,19 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 describe('URL Construction Bug Analysis', () => {
   it('should expose the environment-dependent URL construction flaw', () => {
+  const start = performance.now();
+  
     // This replicates the exact logic from homepage-data.ts
     const testEnvironmentLogic = (nodeEnv: string | undefined) => {
       return nodeEnv === 'test' ? 'http://localhost:3000' : '';
-    };
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+};
     
     const environments = [
       { name: 'test', value: 'test' },
@@ -57,12 +63,17 @@ describe('URL Construction Bug Analysis', () => {
   });
 
   it('should demonstrate why relative URLs fail in Node.js fetch', async () => {
+  const start = performance.now();
+  
     const urlTestCases = [
       {
         name: 'Absolute URL (works)',
         url: 'http://localhost:3000/api/test',
         expectSuccess: true
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         name: 'Relative URL (fails)',
         url: '/api/test',
@@ -105,10 +116,15 @@ describe('URL Construction Bug Analysis', () => {
   });
 
   it('should show the fix needed for the bug', () => {
+  const start = performance.now();
+  
     // Current buggy logic
     const currentLogic = (nodeEnv: string | undefined) => {
       return nodeEnv === 'test' ? 'http://localhost:3000' : '';
-    };
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+};
     
     // Fixed logic that would work
     const fixedLogic = (nodeEnv: string | undefined, isServerSide: boolean = false) => {
@@ -155,6 +171,8 @@ describe('URL Construction Bug Analysis', () => {
   });
 
   it('should demonstrate the MSW testing implications', () => {
+  const start = performance.now();
+  
     // MSW can only intercept certain URL types in Node.js
     const mswTestCases = [
       {
@@ -162,7 +180,10 @@ describe('URL Construction Bug Analysis', () => {
         url: 'http://localhost:3000/api/test',
         mswCanIntercept: true,
         reason: 'Standard MSW interception'
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         type: 'Relative URL',  
         url: '/api/test',
@@ -195,13 +216,18 @@ describe('URL Construction Bug Analysis', () => {
   });
 
   it('should trace the complete bug scenario step by step', () => {
+  const start = performance.now();
+  
     console.log('\n🎯 Complete Bug Scenario Trace:');
     
     const scenario = {
       environment: 'production',
       context: 'server-side rendering',
       steps: []
-    };
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+};
     
     // Step 1: Environment detection
     const nodeEnv = 'production';

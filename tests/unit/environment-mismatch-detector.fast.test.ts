@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 describe('Environment Mismatch Detector (Generalized)', () => {
   let originalEnv: string | undefined;
@@ -22,6 +23,8 @@ describe('Environment Mismatch Detector (Generalized)', () => {
   });
 
   it('should detect environment-dependent code paths that break', () => {
+  const start = performance.now();
+  
     console.log('🔍 GENERALIZED ENVIRONMENT MISMATCH DETECTION');
     console.log('===========================================\n');
     
@@ -33,7 +36,11 @@ describe('Environment Mismatch Detector (Generalized)', () => {
         testFunction: (nodeEnv: string, hasWindow: boolean) => {
           // This represents the common pattern we want to catch
           const baseUrl = nodeEnv === 'test' ? 'http://localhost:3000' : '';
-          const fullUrl = `${baseUrl}/api/endpoint`;
+          const fullUrl = `${baseUrl
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}/api/endpoint`;
           
           // The test: Can this URL actually be used?
           try {
@@ -150,6 +157,8 @@ describe('Environment Mismatch Detector (Generalized)', () => {
   });
 
   it('should provide generalized fix patterns for environment mismatches', () => {
+  const start = performance.now();
+  
     console.log('🔧 GENERALIZED FIX PATTERNS');
     console.log('===========================\n');
     
@@ -159,7 +168,10 @@ describe('Environment Mismatch Detector (Generalized)', () => {
         badPattern: 'const url = env === "test" ? absolute : relative',
         goodPattern: 'const url = (env === "test" || isServer) ? absolute : relative',
         principle: 'Consider context (server/browser) not just environment'
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         problem: 'Mock-Dependent Testing',
         badPattern: 'Only test with mocks that mask real failures',
@@ -193,6 +205,8 @@ describe('Environment Mismatch Detector (Generalized)', () => {
   });
 
   it('should provide a reusable test pattern for any environment-dependent code', () => {
+  const start = performance.now();
+  
     console.log('🛠️ REUSABLE TEST PATTERN');
     console.log('=======================\n');
     
@@ -204,7 +218,11 @@ describe('Environment Mismatch Detector (Generalized)', () => {
      */
     function testEnvironmentMismatch<T>(
       functionToTest: (nodeEnv: string, hasWindow: boolean) => T,
-      validateResult: (result: T, context: { env: string, hasWindow: boolean }) => boolean,
+      validateResult: (result: T, context: { env: string, hasWindow: boolean
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}) => boolean,
       functionName: string
     ) {
       const environments = ['test', 'production', 'development'];
@@ -274,6 +292,8 @@ describe('Environment Mismatch Detector (Generalized)', () => {
   });
 
   it('should validate common infrastructure assumptions', () => {
+  const start = performance.now();
+  
     console.log('🏗️ INFRASTRUCTURE ASSUMPTION VALIDATOR');
     console.log('====================================\n');
     
@@ -286,7 +306,11 @@ describe('Environment Mismatch Detector (Generalized)', () => {
           const relativeUrl = '/api/test';
           try {
             new URL(relativeUrl);
-            return { valid: true, reason: 'URL parseable' };
+            return { valid: true, reason: 'URL parseable'
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+};
           } catch (error) {
             return { valid: false, reason: 'MSW cannot intercept relative URLs in Node.js' };
           }

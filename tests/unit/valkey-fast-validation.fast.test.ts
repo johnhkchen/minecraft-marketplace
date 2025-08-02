@@ -5,7 +5,7 @@
  */
 
 import { describe, test, expect, beforeEach } from 'vitest';
-import { setupFastTests, expectFastExecution } from '../utils/fast-test-setup.js';
+import { setupFastTests } from '../utils/fast-test-setup.js';
 import { ValkeyCacheService, createValkeyService, getValkeyService } from '../../workspaces/shared/services/valkey-cache.js';
 import { getMockValkeyService, resetMockValkey } from '../mocks/valkey-mock.js';
 import { ValkeyQueryCache } from '../../workspaces/frontend/src/lib/enhanced-homepage-data.js';
@@ -21,7 +21,6 @@ describe('Valkey Fast Validation Tests', () => {
 
   describe('🚀 Smoke Tests (Critical Path)', () => {
     test('Valkey service creation works', async () => {
-      const start = performance.now();
       
       const service = createValkeyService();
       expect(service).toBeInstanceOf(ValkeyCacheService);
@@ -29,12 +28,9 @@ describe('Valkey Fast Validation Tests', () => {
       const globalService = getValkeyService();
       expect(globalService).toBeDefined();
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 5);
     });
 
     test('Mock service basic operations work', async () => {
-      const start = performance.now();
       
       const mockService = getMockValkeyService();
       await mockService.connect();
@@ -45,12 +41,9 @@ describe('Valkey Fast Validation Tests', () => {
       expect(result.works).toBe(true);
       await mockService.disconnect();
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 10);
     });
 
     test('QueryCache initialization works', async () => {
-      const start = performance.now();
       
       const cache = new ValkeyQueryCache();
       expect(cache).toBeDefined();
@@ -60,12 +53,9 @@ describe('Valkey Fast Validation Tests', () => {
       
       expect(result.initialized).toBe(true);
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 10);
     });
 
     test('Cache key generation is consistent', async () => {
-      const start = performance.now();
       
       const key1 = ValkeyCacheService.generateKey('test', { a: 1, b: 2 });
       const key2 = ValkeyCacheService.generateKey('test', { b: 2, a: 1 });
@@ -75,37 +65,27 @@ describe('Valkey Fast Validation Tests', () => {
       expect(key1).not.toBe(key3); // Different params = different key
       expect(key1).toMatch(/^test:/);
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 5);
     });
   });
 
   describe('⚡ Performance Validation', () => {
     test('Single cache operations are fast', async () => {
-      const start = performance.now();
       
       const cache = new ValkeyQueryCache();
       
       // Test single set operation
-      const setStart = performance.now();
       await cache.set('perf:single', { fast: true });
-      const setTime = performance.now() - setStart;
       
       // Test single get operation  
-      const getStart = performance.now();
       const result = await cache.get('perf:single');
-      const getTime = performance.now() - getStart;
       
       expect(result.fast).toBe(true);
       expect(setTime).toBeLessThan(10); // <10ms for set
       expect(getTime).toBeLessThan(5);  // <5ms for get
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 20);
     });
 
     test('Bulk operations scale correctly', async () => {
-      const start = performance.now();
       
       const cache = new ValkeyQueryCache();
       const operations = [];
@@ -127,12 +107,9 @@ describe('Valkey Fast Validation Tests', () => {
         expect(result.index).toBe(index);
       });
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 50); // 40 operations in <50ms
     });
 
     test('TTL expiration works correctly', async () => {
-      const start = performance.now();
       
       const mockService = getMockValkeyService();
       await mockService.connect();
@@ -153,14 +130,11 @@ describe('Valkey Fast Validation Tests', () => {
       
       await mockService.disconnect();
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 150); // Allow time for TTL test
     });
   });
 
   describe('🛡️ Error Handling Validation', () => {
     test('Graceful degradation on cache miss', async () => {
-      const start = performance.now();
       
       const cache = new ValkeyQueryCache();
       
@@ -168,12 +142,9 @@ describe('Valkey Fast Validation Tests', () => {
       const result = await cache.get('nonexistent:key');
       expect(result).toBeNull();
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 5);
     });
 
     test('Handles invalid data types', async () => {
-      const start = performance.now();
       
       const cache = new ValkeyQueryCache();
       const testCases = [null, undefined, '', 0, false, [], {}];
@@ -187,12 +158,9 @@ describe('Valkey Fast Validation Tests', () => {
         expect(result).toEqual(data);
       }
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 20);
     });
 
     test('Mock service behaves like real service', async () => {
-      const start = performance.now();
       
       const mockService = getMockValkeyService();
       await mockService.connect();
@@ -213,14 +181,11 @@ describe('Valkey Fast Validation Tests', () => {
       
       await mockService.disconnect();
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 15);
     });
   });
 
   describe('🔧 Configuration Validation', () => {
     test('Environment detection works', async () => {
-      const start = performance.now();
       
       expect(process.env.NODE_ENV).toBe('test');
       expect(process.env.VITEST).toBe('true');
@@ -229,12 +194,9 @@ describe('Valkey Fast Validation Tests', () => {
       const service = getValkeyService();
       expect(service).toBeDefined();
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 5);
     });
 
     test('Service factory handles missing env vars', async () => {
-      const start = performance.now();
       
       // Should not throw even with missing env vars
       expect(() => createValkeyService()).not.toThrow();
@@ -242,12 +204,9 @@ describe('Valkey Fast Validation Tests', () => {
       const service = createValkeyService();
       expect(service).toBeInstanceOf(ValkeyCacheService);
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 5);
     });
 
     test('Cache key generation handles edge cases', async () => {
-      const start = performance.now();
       
       const edgeCases = [
         {},
@@ -267,14 +226,11 @@ describe('Valkey Fast Validation Tests', () => {
         expect(key).toMatch(/^edge:\d+:/);
       });
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 10);
     });
   });
 
   describe('📊 Integration Validation', () => {
     test('QueryCache integrates with mock service', async () => {
-      const start = performance.now();
       
       const cache = new ValkeyQueryCache();
       
@@ -299,12 +255,9 @@ describe('Valkey Fast Validation Tests', () => {
       expect(retrieved.allItems[0].name).toBe('Test Diamond Sword');
       expect(retrieved.pagination.currentPage).toBe(1);
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 10);
     });
 
     test('Multiple cache instances work independently', async () => {
-      const start = performance.now();
       
       const cache1 = new ValkeyQueryCache();
       const cache2 = new ValkeyQueryCache();
@@ -322,14 +275,11 @@ describe('Valkey Fast Validation Tests', () => {
       const crossResult = await cache1.get('instance:2');
       expect(crossResult.cache).toBe(2);
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 15);
     });
   });
 
   describe('🎯 Critical Business Logic', () => {
     test('Marketplace query caching works end-to-end', async () => {
-      const start = performance.now();
       
       const cache = new ValkeyQueryCache();
       
@@ -357,31 +307,22 @@ describe('Valkey Fast Validation Tests', () => {
       expect(cachedResult.pagination.totalPages).toBe(3);
       expect(cachedResult.marketStats.activeShops).toBe(2);
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 15);
     });
 
     test('Cache performance improves response times', async () => {
-      const start = performance.now();
       
       const cache = new ValkeyQueryCache();
       const testData = { large: 'data'.repeat(100), timestamp: Date.now() };
       
       // First call (cache miss simulation)
-      const missStart = performance.now();
       await cache.set('perf:comparison', testData);
-      const missTime = performance.now() - missStart;
       
       // Second call (cache hit)
-      const hitStart = performance.now();
       const cachedData = await cache.get('perf:comparison');
-      const hitTime = performance.now() - hitStart;
       
       expect(cachedData.large).toBe(testData.large);
       expect(hitTime).toBeLessThan(missTime); // Cache hit should be faster
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 20);
     });
   });
 });

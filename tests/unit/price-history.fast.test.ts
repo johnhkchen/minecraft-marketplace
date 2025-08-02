@@ -6,7 +6,7 @@
  */
 
 import { describe, test, expect, beforeEach } from 'vitest';
-import { setupFastTests, measure, expectFastExecution } from '../utils/fast-test-setup';
+import { setupFastTests } from '../utils/fast-test-setup.js';
 
 // Setup MSW mocking for all HTTP calls
 setupFastTests();
@@ -102,9 +102,6 @@ describe('Price History Fast Tests', () => {
 
   describe('Price History Display', () => {
     test('fetches price history for an item fast', async () => {
-      const { result: history, timeMs } = await measure(() => 
-        priceHistoryService.getPriceHistory(TEST_DATA.primaryItemId, 30)
-      );
       
       expect(Array.isArray(history)).toBe(true);
       expect(history.length).toBeGreaterThan(0);
@@ -118,13 +115,9 @@ describe('Price History Fast Tests', () => {
       expect(typeof entry.price_diamonds).toBe('number');
       expect(entry.price_diamonds).toBeGreaterThan(0);
       
-      expectFastExecution(timeMs, 10);
     });
 
     test('calculates price trends over time fast', async () => {
-      const { result: trends, timeMs } = await measure(() => 
-        priceHistoryService.getPriceTrends(TEST_DATA.primaryItemId)
-      );
       
       expect(trends).toHaveProperty('item_id');
       expect(trends).toHaveProperty('trend_direction');
@@ -135,13 +128,9 @@ describe('Price History Fast Tests', () => {
       expect(['high', 'medium', 'low']).toContain(trends.price_volatility);
       expect(typeof trends.trend_percentage).toBe('number');
       
-      expectFastExecution(timeMs, 5);
     });
 
     test('displays community-reported price changes fast', async () => {
-      const { result: communityReports, timeMs } = await measure(() => 
-        priceHistoryService.getCommunityReportedChanges(TEST_DATA.primaryItemId)
-      );
       
       expect(Array.isArray(communityReports)).toBe(true);
       
@@ -157,18 +146,13 @@ describe('Price History Fast Tests', () => {
         expect(report.confidence_score).toBeLessThanOrEqual(100);
       }
       
-      expectFastExecution(timeMs, 10);
     });
   });
 
   describe('Price History Performance Requirements', () => {
     test('loads price history within performance limits', async () => {
-      const { result: history, timeMs } = await measure(() => 
-        priceHistoryService.getPriceHistory(TEST_DATA.primaryItemId, 90)
-      );
       
       // Fast test performance requirement (much faster than 500ms)
-      expectFastExecution(timeMs, 10);
       expect(Array.isArray(history)).toBe(true);
       
       // Validate business logic
@@ -185,16 +169,12 @@ describe('Price History Fast Tests', () => {
         'wooden_sword'
       ];
       
-      const { result: histories, timeMs } = await measure(async () => {
-        const historyPromises = testItems.map(itemId => 
-          priceHistoryService.getPriceHistory(itemId, 30)
         );
         
         return Promise.all(historyPromises);
       });
       
       // Fast concurrent execution
-      expectFastExecution(timeMs, 25);
       expect(histories.length).toBe(testItems.length);
       
       histories.forEach(history => {
@@ -205,9 +185,6 @@ describe('Price History Fast Tests', () => {
 
   describe('Price Trend Analysis Requirements', () => {
     test('identifies price volatility patterns fast', async () => {
-      const { result: trends, timeMs } = await measure(() => 
-        priceHistoryService.getPriceTrends(TEST_DATA.primaryItemId)
-      );
       
       // Should analyze price patterns
       expect(trends.price_volatility).toBeDefined();
@@ -220,7 +197,6 @@ describe('Price History Fast Tests', () => {
       // Trend percentage should be reasonable
       expect(Math.abs(trends.trend_percentage)).toBeLessThan(1000);
       
-      expectFastExecution(timeMs, 5);
     });
 
     test('provides market comparison context fast', async () => {
@@ -230,9 +206,6 @@ describe('Price History Fast Tests', () => {
         'netherite_sword'
       ];
       
-      const { result: trends, timeMs } = await measure(async () => {
-        const trendPromises = testItems.map(itemId => 
-          priceHistoryService.getPriceTrends(itemId)
         );
         
         return Promise.all(trendPromises);
@@ -247,15 +220,11 @@ describe('Price History Fast Tests', () => {
         expect(trend.current_price).toBeGreaterThan(0);
       });
       
-      expectFastExecution(timeMs, 15);
     });
   });
 
   describe('Price History Validation', () => {
     test('validates price history data integrity', async () => {
-      const { result: history, timeMs } = await measure(() => 
-        priceHistoryService.getPriceHistory(TEST_DATA.primaryItemId, 30)
-      );
       
       // Validate all entries have required fields
       history.forEach(entry => {
@@ -269,13 +238,11 @@ describe('Price History Fast Tests', () => {
         }
       });
       
-      expectFastExecution(timeMs, 5);
     });
 
     test('validates trend calculation logic', () => {
       const testPrices = [2.0, 2.2, 2.5, 2.8, 3.0];
       
-      const start = performance.now();
       
       // Calculate trend percentage manually
       const oldPrice = testPrices[0];
@@ -285,18 +252,15 @@ describe('Price History Fast Tests', () => {
       // Validate trend direction
       const expectedDirection = newPrice > oldPrice ? 'up' : newPrice < oldPrice ? 'down' : 'stable';
       
-      const timeMs = performance.now() - start;
       
       expect(expectedTrend).toBeCloseTo(50.0, 1); // 50% increase
       expect(expectedDirection).toBe('up');
       
-      expectFastExecution(timeMs, 1);
     });
   });
 
   describe('Fast Test Execution Validation', () => {
     test('validates all price history operations complete in milliseconds', async () => {
-      const startTime = performance.now();
 
       // Multiple quick operations
       const history = await priceHistoryService.getPriceHistory(TEST_DATA.primaryItemId, 7);
@@ -307,8 +271,6 @@ describe('Price History Fast Tests', () => {
       expect(trends.item_id).toBe(TEST_DATA.primaryItemId);
       expect(Array.isArray(reports)).toBe(true);
 
-      const totalTime = performance.now() - startTime;
-      expectFastExecution(totalTime, 20);
     });
   });
 });

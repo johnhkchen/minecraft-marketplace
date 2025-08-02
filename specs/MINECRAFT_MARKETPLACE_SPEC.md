@@ -413,6 +413,20 @@ class EpicValidator {
 - **End-to-End Tests**: <30s total execution, <10s per workflow (full stack)
 - **Performance Tests**: Validate Epic requirements (<2s search, <500ms filtering)
 
+#### **⚠️ CRITICAL: Performance Anti-Patterns Identified**
+
+**SPEED ANALYSIS FINDINGS**: Comprehensive testing revealed techniques causing 1000x+ slowdown:
+
+**CATASTROPHIC SLOWDOWN (AVOID):**
+- **hardcoded-data**: 18,753x slower than baseline
+- **docker/testcontainers**: 6,773x-12,433x slower than baseline  
+- **database-integration**: 4,098x slower than baseline
+- **198 orphaned tests** cannot run without infrastructure
+
+**FAST PATTERNS (PREFER):**
+- **MSW-mocking**: Only 5.8x slower than baseline
+- **performance-validation**: 19.5x slower (acceptable for measurement)
+
 #### **Mocking Strategy by Test Layer**
 
 **Unit Tests - MSW API Mocking**: Mock external APIs, no real infrastructure

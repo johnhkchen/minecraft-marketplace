@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Homepage Comprehensive Data Validation', () => {
   
   // Set shorter timeout for individual tests to prevent hanging
-  test.setTimeout(25000); // 25 seconds max per test
+  test.setTimeout(10000); // 10 seconds max per test
   
   test.describe('Layer 1: Basic Page Functionality', () => {
     test('should load homepage successfully with core elements', async ({ page }) => {
@@ -47,7 +47,7 @@ test.describe('Homepage Comprehensive Data Validation', () => {
       
       // Wait for dynamic content to load with timeout
       try {
-        await page.waitForSelector('.item-name', { timeout: 5000 });
+        await page.waitForSelector('.item-name');
       } catch (error) {
         console.log('⚠️ Items not loaded within timeout, proceeding with available content');
       }

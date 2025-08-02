@@ -13,6 +13,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setupFastTests } from '../utils/fast-test-setup.js';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 // Setup MSW mocking
 setupFastTests();
@@ -23,6 +24,8 @@ describe('Homepage Data 55 vs 18 Item Discrepancy', () => {
   });
 
   it('should detect the exact layer where 55 items become 18 items', async () => {
+  const start = performance.now();
+  
     console.log('🔍 SYSTEMATIC DISCREPANCY ANALYSIS');
     console.log('Database has 55 items, frontend shows 18 - WHERE is the data lost?');
     console.log('');
@@ -34,7 +37,11 @@ describe('Homepage Data 55 vs 18 Item Discrepancy', () => {
       const directApiData = directApiResponse.ok ? await directApiResponse.json() : null;
       const directApiCount = directApiData ? directApiData.length : 0;
       
-      console.log(`   PostgREST direct: ${directApiCount} items`);
+      console.log(`   PostgREST direct: ${directApiCount
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+} items`);
       
       if (directApiCount === 55) {
         console.log('   ✅ PostgREST layer: CORRECT (55 items)');
@@ -114,13 +121,19 @@ describe('Homepage Data 55 vs 18 Item Discrepancy', () => {
   });
 
   it('should detect if homepage is using fallback data instead of API data', async () => {
+  const start = performance.now();
+  
     console.log('');
     console.log('🔍 FALLBACK DATA DETECTION');
     console.log('Testing if homepage is accidentally using fallback/synthetic data');
     console.log('');
 
     try {
-      const { loadHomepageData } = await import('../../workspaces/frontend/src/lib/homepage-data.js');
+      const { loadHomepageData
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+} = await import('../../workspaces/frontend/src/lib/homepage-data.js');
       
       // Mock console.error to detect API failures
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -174,6 +187,8 @@ describe('Homepage Data 55 vs 18 Item Discrepancy', () => {
   });
 
   it('should validate that MSW handlers return realistic 55-item dataset', async () => {
+  const start = performance.now();
+  
     console.log('');
     console.log('🎭 MSW HANDLER VALIDATION');
     console.log('Testing if MSW mocks are providing realistic data scale');
@@ -185,7 +200,10 @@ describe('Homepage Data 55 vs 18 Item Discrepancy', () => {
         url: 'http://localhost:3000/api/data/public_items',
         description: 'All items',
         expectedMinimum: 15 // Should have substantial data
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         url: 'http://localhost:3000/api/data/public_items?limit=20&offset=0&order=price_diamonds.desc',
         description: 'Homepage pagination call',
@@ -235,6 +253,8 @@ describe('Homepage Data 55 vs 18 Item Discrepancy', () => {
   });
 
   it('should identify exact API endpoint differences between expected and actual', async () => {
+  const start = performance.now();
+  
     console.log('');
     console.log('🔗 API ENDPOINT COMPARISON');
     console.log('Comparing what we expect vs what we actually get from each endpoint');
@@ -247,7 +267,10 @@ describe('Homepage Data 55 vs 18 Item Discrepancy', () => {
         expectedProperty: 'length',
         expectedValue: 55,
         description: 'Should return 55 total items'
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         name: 'Paginated items (homepage call)',
         url: 'http://localhost:3000/api/data/public_items?limit=20&offset=0&order=price_diamonds.desc',

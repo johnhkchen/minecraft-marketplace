@@ -43,7 +43,7 @@ test.describe('Homepage Quick Validation', () => {
     
     try {
       // Wait briefly for items to appear
-      await page.waitForSelector('.item-name', { timeout: 3000 });
+      await page.waitForSelector('.item-name');
       
       const itemElements = page.locator('.item-name');
       const displayedCount = await itemElements.count();
@@ -198,7 +198,7 @@ test.describe('Homepage Quick Validation', () => {
     
     try {
       // Wait briefly for price elements
-      await page.waitForSelector('.price-display', { timeout: 3000 });
+      await page.waitForSelector('.price-display');
       
       const priceElements = page.locator('.price-display');
       const priceCount = await priceElements.count();

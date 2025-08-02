@@ -4,12 +4,15 @@
 
 import { describe, it, expect } from 'vitest';
 import { setupFastTests } from '../utils/fast-test-setup.js';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 // Setup MSW mocking - this will intercept our API calls
 setupFastTests();
 
 describe('Homepage Data Simple Test', () => {
   it('should make successful API calls to get paginated data', async () => {
+  const start = performance.now();
+  
     // Test the exact API calls that homepage makes
     
     // First test: Check if MSW can handle our API calls with full URL
@@ -22,7 +25,10 @@ describe('Homepage Data Simple Test', () => {
       expect(data1.length).toBeGreaterThan(0);
       expect(data1[0]).toHaveProperty('name');
       expect(data1[0]).toHaveProperty('price_diamonds');
-    }
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}
 
     // Second test: Pagination API
     const response2 = await fetch('http://localhost:3000/api/data/public_items?limit=20&offset=0&order=price_diamonds.desc');
@@ -46,6 +52,8 @@ describe('Homepage Data Simple Test', () => {
   });
 
   it('should work with the homepage data function using absolute URLs', async () => {
+  const start = performance.now();
+  
     // Create a modified version of loadHomepageData that uses absolute URLs for testing
     const loadTestData = async () => {
       try {
@@ -68,7 +76,10 @@ describe('Homepage Data Simple Test', () => {
             totalPages: Math.ceil(totalItems.length / 20),
             itemsPerPage: 20,
             totalItems: totalItems.length
-          }
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}
         };
       } catch (error) {
         console.log('❌ Test function error:', error.message);

@@ -29,9 +29,9 @@ COPY database/ ./database/
 # Install all dependencies (including dev dependencies for build)
 RUN npm ci
 
-# Build shared module first
+# Build shared module first (skip if no src directory)
 WORKDIR /app/workspaces/shared
-RUN npm run build
+RUN if [ -d "src" ]; then npm run build; else echo "No shared src directory, skipping build"; fi
 
 # Build the frontend application
 WORKDIR /app/workspaces/frontend
@@ -41,21 +41,20 @@ RUN npm run build
 FROM node:lts AS runtime
 WORKDIR /app
 
-# Copy the entire built project
-COPY --from=builder /app/workspaces/frontend/dist ./dist
-COPY --from=builder /app/workspaces/frontend/package*.json ./
-COPY --from=builder /app/workspaces/shared ./shared
+# Create non-root user first
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 astro
+
+# Copy the entire built project with correct ownership
+COPY --from=builder --chown=astro:nodejs /app/workspaces/frontend/dist ./dist
+COPY --from=builder --chown=astro:nodejs /app/workspaces/frontend/package*.json ./
+COPY --from=builder --chown=astro:nodejs /app/workspaces/shared ./shared
 
 # Install only production dependencies for runtime
 RUN npm install --omit=dev
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 astro
-
-# Create upload directories and set ownership
-RUN mkdir -p uploads/evidence && \
-    chown -R astro:nodejs /app
+# Create upload directories with proper ownership from the start
+RUN mkdir -p uploads/evidence && chown -R astro:nodejs uploads
 
 # Set environment variables per Astro documentation
 ENV NODE_ENV=production

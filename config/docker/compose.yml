@@ -31,7 +31,7 @@ services:
   # ============================================================================
   frontend:
     build:
-      context: .
+      context: ../..
       dockerfile: config/docker/Dockerfile.frontend
       args:
         - BUILD_TAG=${BUILD_TAG:-latest}
@@ -65,7 +65,7 @@ services:
   # ============================================================================
   backend:
     build:
-      context: .
+      context: ../..
       dockerfile: config/docker/Dockerfile.backend
       args:
         - BUILD_TAG=${BUILD_TAG:-latest}

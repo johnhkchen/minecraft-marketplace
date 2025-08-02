@@ -24,7 +24,7 @@ test.describe('Production Homepage Validation', () => {
     await page.goto('http://localhost:7410');
     
     // Wait for page to load and data to populate
-    await page.waitForSelector('[data-testid="marketplace-stats"], .marketplace-stats, .market-stats', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="marketplace-stats"], .marketplace-stats, .market-stats');
     
     console.log('📊 Extracting marketplace statistics...');
     

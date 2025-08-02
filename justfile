@@ -61,14 +61,15 @@ test-e2e:
     echo "   📋 SCOPE: Login, dashboard, inventory management, mobile experience"
     echo ""
     
-    # Check if development server is already running
-    if curl -f -s http://localhost:4321 > /dev/null 2>&1; then
-        echo "✅ Development server is already running at http://localhost:4321"
-        echo "🧪 Running E2E tests against existing server..."
+    # Check if production stack is already running
+    if curl -f -s http://localhost:7410 > /dev/null 2>&1; then
+        echo "✅ Production stack is already running at http://localhost:7410"
+        echo "🧪 Running E2E tests against existing nginx endpoint..."
         npx playwright test
     else
-        echo "🚀 Starting development server and running E2E tests..."
-        echo "💡 This will start the frontend dev server automatically"
+        echo "🚀 Starting full production stack and running E2E tests..."
+        echo "💡 This will start the complete stack (nginx → astro → hono → db)"
+        echo "⏱️  Please wait for Docker services to start..."
         npx playwright test
     fi
 

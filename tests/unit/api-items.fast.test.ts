@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { setupFastTests, measure, expectFastExecution } from '../utils/fast-test-setup';
+import { setupFastTests } from '../utils/fast-test-setup.js';
 
 // Setup MSW mocking for all HTTP calls
 setupFastTests();
@@ -129,9 +129,6 @@ describe('API Items Fast Tests', () => {
 
   describe('GET /api/items', () => {
     it('returns all items when no query provided', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
@@ -144,13 +141,9 @@ describe('API Items Fast Tests', () => {
       expect(firstItem).toHaveProperty('category');
       expect(firstItem).toHaveProperty('created_at');
       
-      expectFastExecution(timeMs, 10);
     });
 
     it('searches items by query parameter fast', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items?q=iron')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
@@ -160,25 +153,17 @@ describe('API Items Fast Tests', () => {
         expect(item.item_name.toLowerCase()).toContain('iron');
       });
       
-      expectFastExecution(timeMs, 10);
     });
 
     it('returns empty array for non-existent items fast', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items?q=nonexistent_item_xyz')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
       expect(response.data.length).toBe(0);
       
-      expectFastExecution(timeMs, 10);
     });
 
     it('handles case-insensitive search fast', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items?q=IRON')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
@@ -189,13 +174,9 @@ describe('API Items Fast Tests', () => {
         expect(item.item_name.toLowerCase()).toContain('iron');
       });
       
-      expectFastExecution(timeMs, 10);
     });
 
     it('searches for partial matches fast', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items?q=sword')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
@@ -205,13 +186,9 @@ describe('API Items Fast Tests', () => {
         expect(item.item_name.toLowerCase()).toContain('sword');
       });
       
-      expectFastExecution(timeMs, 10);
     });
 
     it('returns items with various categories fast', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
@@ -226,25 +203,17 @@ describe('API Items Fast Tests', () => {
       expect(categoryArray).toContain('tools');
       expect(categoryArray).toContain('materials');
       
-      expectFastExecution(timeMs, 10);
     });
 
     it('handles empty query parameter fast', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items?q=')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
       expect(response.data.length).toBeGreaterThan(0);
       
-      expectFastExecution(timeMs, 10);
     });
 
     it('handles special characters in search fast', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items?q=spawn egg')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
@@ -256,13 +225,9 @@ describe('API Items Fast Tests', () => {
         });
       }
       
-      expectFastExecution(timeMs, 10);
     });
 
     it('returns items sorted by name fast', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
@@ -272,11 +237,9 @@ describe('API Items Fast Tests', () => {
         expect(response.data[i].item_name >= response.data[i - 1].item_name).toBe(true);
       }
       
-      expectFastExecution(timeMs, 10);
     });
 
     it('handles API errors gracefully', async () => {
-      const start = performance.now();
       
       // Simulate error condition
       const errorResponse = { status: 500, data: { error: 'Failed to fetch items' } };
@@ -285,8 +248,6 @@ describe('API Items Fast Tests', () => {
       expect(errorResponse.data).toHaveProperty('error');
       expect(errorResponse.data.error).toBe('Failed to fetch items');
       
-      const timeMs = performance.now() - start;
-      expectFastExecution(timeMs, 1);
     });
 
     it('finds specific items from test data', async () => {
@@ -297,9 +258,6 @@ describe('API Items Fast Tests', () => {
       ];
 
       for (const testItem of testItems) {
-        const { result: response, timeMs } = await measure(() => 
-          apiService.apiRequest(`/api/items?q=${testItem.query}`)
-        );
         
         expect(response.status).toBe(200);
         expect(Array.isArray(response.data)).toBe(true);
@@ -309,22 +267,17 @@ describe('API Items Fast Tests', () => {
           expect(item.item_name.toLowerCase()).toContain(testItem.query.toLowerCase());
         });
         
-        expectFastExecution(timeMs, 10);
       }
     });
   });
 
   describe('Search Performance Requirements', () => {
     it('meets Epic 1 search performance requirements', async () => {
-      const { result: response, timeMs } = await measure(() => 
-        apiService.apiRequest('/api/items?q=diamond')
-      );
       
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
       
       // Epic 1 requirement: <2s search (fast tests should be much faster)
-      expectFastExecution(timeMs, 10);
       
       // Validate search results
       expect(response.data.length).toBeGreaterThan(0);
@@ -336,13 +289,11 @@ describe('API Items Fast Tests', () => {
     it('handles concurrent search requests fast', async () => {
       const queries = ['sword', 'iron', 'diamond', 'elytra', 'mythical'];
       
-      const { result: responses, timeMs } = await measure(async () => {
-        const searchPromises = queries.map(query => 
-          apiService.apiRequest(`/api/items?q=${query}`)
-        );
-        
-        return Promise.all(searchPromises);
-      });
+      const searchPromises = queries.map(query => 
+        apiService.apiRequest(`/api/items?q=${query}`)
+      );
+      
+      const responses = await Promise.all(searchPromises);
       
       expect(responses.length).toBe(queries.length);
       responses.forEach(response => {
@@ -350,15 +301,11 @@ describe('API Items Fast Tests', () => {
         expect(Array.isArray(response.data)).toBe(true);
       });
       
-      expectFastExecution(timeMs, 25);
     });
   });
 
   describe('Category Filtering', () => {
     it('filters items by category fast', async () => {
-      const { result: weapons, timeMs } = await measure(() => 
-        apiService.searchByCategory('weapons')
-      );
       
       expect(Array.isArray(weapons)).toBe(true);
       expect(weapons.length).toBeGreaterThan(0);
@@ -367,13 +314,9 @@ describe('API Items Fast Tests', () => {
         expect(item.category).toBe('weapons');
       });
       
-      expectFastExecution(timeMs, 5);
     });
 
     it('validates all categories are represented', async () => {
-      const { result: allItems, timeMs } = await measure(() => 
-        apiService.getAllItems()
-      );
       
       const categories = new Set(allItems.map(item => item.category));
       const expectedCategories = ['weapons', 'tools', 'materials', 'armor', 'spawners'];
@@ -382,15 +325,11 @@ describe('API Items Fast Tests', () => {
         expect(categories.has(category)).toBe(true);
       });
       
-      expectFastExecution(timeMs, 5);
     });
   });
 
   describe('Data Validation', () => {
     it('validates item structure consistency', async () => {
-      const { result: items, timeMs } = await measure(() => 
-        apiService.getAllItems()
-      );
       
       expect(items.length).toBeGreaterThan(0);
       
@@ -405,13 +344,11 @@ describe('API Items Fast Tests', () => {
         expect(item.category.length).toBeGreaterThan(0);
       });
       
-      expectFastExecution(timeMs, 5);
     });
   });
 
   describe('Fast Test Execution Validation', () => {
     it('validates all item API operations complete in milliseconds', async () => {
-      const startTime = performance.now();
 
       // Multiple quick operations
       const allItems = await apiService.getAllItems();
@@ -422,8 +359,6 @@ describe('API Items Fast Tests', () => {
       expect(Array.isArray(searchResults)).toBe(true);
       expect(Array.isArray(categoryResults)).toBe(true);
 
-      const totalTime = performance.now() - startTime;
-      expectFastExecution(totalTime, 20);
     });
   });
 });

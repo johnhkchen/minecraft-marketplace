@@ -6,9 +6,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 describe('Homepage Data Fix Guide', () => {
   it('should identify the exact code location needing the fix', () => {
+  const start = performance.now();
+  
     console.log('📍 BUG LOCATION IDENTIFIED:');
     console.log('');
     console.log('File: workspaces/frontend/src/lib/homepage-data.ts');
@@ -20,7 +23,11 @@ describe('Homepage Data Fix Guide', () => {
     const currentCodePattern = `
 // CURRENT BUGGY CODE:
 const baseUrl = process.env.NODE_ENV === 'test' ? 'http://localhost:3000' : '';
-const response = await fetch(\`\${baseUrl}/api/data/public_items?limit=\${itemsPerPage}\`);
+const response = await fetch(\`\${baseUrl
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}/api/data/public_items?limit=\${itemsPerPage}\`);
     `.trim();
     
     console.log('🚨 CURRENT BUGGY CODE:');
@@ -40,6 +47,8 @@ const response = await fetch(\`\${baseUrl}/api/data/public_items?limit=\${itemsP
   });
 
   it('should provide the exact code fix needed', () => {
+  const start = performance.now();
+  
     // Fixed code pattern
     const fixedCodePattern = `
 // FIXED CODE OPTION 1: Environment-aware absolute URLs
@@ -47,7 +56,10 @@ function getBaseUrl(): string {
   // In server-side contexts (SSR), always use absolute URLs
   if (typeof window === 'undefined') {
     return process.env.API_BASE_URL || 'http://localhost:3000';
-  }
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}
   
   // In browser contexts, can use relative URLs for production
   return process.env.NODE_ENV === 'test' ? 'http://localhost:3000' : '';
@@ -86,13 +98,18 @@ const response = await fetch(\`\${baseUrl}/api/data/public_items?limit=\${itemsP
   });
 
   it('should validate the fix works across all environments', () => {
+  const start = performance.now();
+  
     // Test the fixed logic
     const getFixedBaseUrl = (nodeEnv: string, hasWindow: boolean = true): string => {
       const isServerSide = !hasWindow;
       
       if (isServerSide) {
         return 'http://localhost:3000'; // Always absolute in SSR
-      }
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}
       
       return nodeEnv === 'test' ? 'http://localhost:3000' : '';
     };
@@ -130,6 +147,8 @@ const response = await fetch(\`\${baseUrl}/api/data/public_items?limit=\${itemsP
   });
 
   it('should provide testing strategy to prevent regression', () => {
+  const start = performance.now();
+  
     console.log('🛡️ REGRESSION PREVENTION STRATEGY:');
     console.log('');
     
@@ -142,7 +161,10 @@ const response = await fetch(\`\${baseUrl}/api/data/public_items?limit=\${itemsP
           'Test fetch() behavior with relative vs absolute URLs',
           'Mock window object to simulate server-side rendering'
         ]
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         level: 'Integration Tests',
         tests: [
@@ -188,6 +210,8 @@ const response = await fetch(\`\${baseUrl}/api/data/public_items?limit=\${itemsP
   });
 
   it('should document the deployment considerations', () => {
+  const start = performance.now();
+  
     console.log('🚀 DEPLOYMENT CONSIDERATIONS:');
     console.log('');
     
@@ -227,7 +251,11 @@ const response = await fetch(\`\${baseUrl}/api/data/public_items?limit=\${itemsP
     
     console.log('✅ DEPLOYMENT CHECKLIST:');
     deploymentChecklist.forEach((item, index) => {
-      console.log(`   ${index + 1}. ${item}`);
+      console.log(`   ${index + 1
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}. ${item}`);
     });
     console.log('');
     

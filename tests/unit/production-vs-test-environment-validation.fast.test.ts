@@ -13,6 +13,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setupFastTests } from '../utils/fast-test-setup.js';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 // Setup MSW mocking for test environment comparison
 setupFastTests();
@@ -23,6 +24,8 @@ describe('Production vs Test Environment Validation', () => {
   });
 
   it('should confirm production system (port 7410) has correct 55-item dataset', async () => {
+  const start = performance.now();
+  
     console.log('🏭 PRODUCTION SYSTEM VALIDATION');
     console.log('Testing actual production deployment on port 7410');
     console.log('');
@@ -34,7 +37,10 @@ describe('Production vs Test Environment Validation', () => {
         url: 'http://localhost:7410/api/data/public_items',
         expectedCount: 55,
         description: 'Should have 55 real marketplace items'
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         name: 'Production shop diversity',
         url: 'http://localhost:7410/api/data/public_items?select=owner_shop_name',
@@ -114,6 +120,8 @@ describe('Production vs Test Environment Validation', () => {
   });
 
   it('should identify the gap between test MSW mocks and production data', async () => {
+  const start = performance.now();
+  
     console.log('');
     console.log('🎭 TEST MOCK vs PRODUCTION GAP ANALYSIS');
     console.log('Comparing MSW test data vs real production data scale');
@@ -127,7 +135,11 @@ describe('Production vs Test Environment Validation', () => {
       const mockCount = Array.isArray(mockData) ? mockData.length : 0;
       const mockShops = new Set(mockData.map((item: any) => item.owner_shop_name).filter(Boolean)).size;
       
-      console.log(`   Mock items: ${mockCount}`);
+      console.log(`   Mock items: ${mockCount
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}`);
       console.log(`   Mock shops: ${mockShops}`);
       console.log(`   Mock status: ${mockResponse.ok ? '✅ Working' : '❌ Failed'}`);
       
@@ -173,6 +185,8 @@ describe('Production vs Test Environment Validation', () => {
   });
 
   it('should validate homepage data loading works correctly in production environment', async () => {
+  const start = performance.now();
+  
     console.log('');
     console.log('🏠 HOMEPAGE DATA LOADING - PRODUCTION VALIDATION');
     console.log('Testing homepage data loading against real production API');
@@ -180,7 +194,11 @@ describe('Production vs Test Environment Validation', () => {
 
     try {
       // Import the homepage data loading function
-      const { loadHomepageData } = await import('../../workspaces/frontend/src/lib/homepage-data.js');
+      const { loadHomepageData
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+} = await import('../../workspaces/frontend/src/lib/homepage-data.js');
       
       // Override the URL construction to point to production
       process.env.NODE_ENV = 'production';

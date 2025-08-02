@@ -11,6 +11,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { URLConstructionService } from '../../shared/services/url-construction-service.js';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 describe('SSR URL Construction Bug', () => {
   beforeEach(() => {
@@ -18,6 +19,8 @@ describe('SSR URL Construction Bug', () => {
   });
 
   it('should expose the systematic bug in SSR URL construction', async () => {
+  const start = performance.now();
+  
     console.log('🔍 SSR URL CONSTRUCTION BUG ANALYSIS');
     console.log('Testing URL construction in different contexts');
     console.log('');
@@ -27,7 +30,11 @@ describe('SSR URL Construction Bug', () => {
     // Test browser context (simulated)
     console.log('🌐 Browser Context (simulated):');
     const browserContext = urlService.getContext(); // This will show server-side in test
-    console.log(`   Is server-side: ${browserContext.isServerSide}`);
+    console.log(`   Is server-side: ${browserContext.isServerSide
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}`);
     console.log(`   Environment: ${browserContext.environment}`);
     
     const browserBaseUrl = urlService.getBaseUrl();
@@ -81,6 +88,8 @@ describe('SSR URL Construction Bug', () => {
   });
 
   it('should demonstrate the fix for SSR URL construction', async () => {
+  const start = performance.now();
+  
     console.log('');
     console.log('🛠️ DEMONSTRATING THE FIX');
     console.log('Testing corrected URL construction for SSR');
@@ -89,7 +98,10 @@ describe('SSR URL Construction Bug', () => {
     // Create URL service with corrected configuration
     const fixedUrlService = new URLConstructionService({
       fallbackBaseUrl: '' // Use relative URLs so nginx can proxy correctly
-    });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
     const fixedContext = fixedUrlService.getContext();
     const fixedBaseUrl = fixedUrlService.getBaseUrl();
@@ -116,6 +128,8 @@ describe('SSR URL Construction Bug', () => {
   });
 
   it('should test URL construction across all expected environments', async () => {
+  const start = performance.now();
+  
     console.log('');
     console.log('🌍 ENVIRONMENT URL CONSTRUCTION TEST');
     console.log('Testing URL construction across different environments');
@@ -125,7 +139,11 @@ describe('SSR URL Construction Bug', () => {
     const contexts = ['server-side', 'browser'];
 
     for (const env of environments) {
-      console.log(`📊 Environment: ${env}`);
+      console.log(`📊 Environment: ${env
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}`);
       
       // Mock environment
       const originalEnv = process.env.NODE_ENV;

@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import { setupFastTests } from '../utils/fast-test-setup.js';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 // Setup MSW mocking
 setupFastTests();
@@ -16,8 +17,14 @@ describe('Homepage Data Loading Debug', () => {
   });
 
   it('should load basic homepage data structure', async () => {
+  const start = performance.now();
+  
     // Import the actual function we're testing
-    const { loadHomepageData } = await import('../../workspaces/frontend/src/lib/homepage-data.js');
+    const { loadHomepageData
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+} = await import('../../workspaces/frontend/src/lib/homepage-data.js');
     
     console.log('📊 Testing loadHomepageData function...');
     
@@ -44,8 +51,14 @@ describe('Homepage Data Loading Debug', () => {
   });
 
   it('should handle API failures gracefully', async () => {
+  const start = performance.now();
+  
     // Test what happens when API fails
-    const { loadHomepageData } = await import('../../workspaces/frontend/src/lib/homepage-data.js');
+    const { loadHomepageData
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+} = await import('../../workspaces/frontend/src/lib/homepage-data.js');
     
     // Mock a failing API call by testing with invalid parameters
     try {
@@ -66,6 +79,8 @@ describe('Homepage Data Loading Debug', () => {
   });
 
   it('should fetch data with correct API endpoints', async () => {
+  const start = performance.now();
+  
     // Test the actual API calls that the function makes
     console.log('🌐 Testing API endpoints directly...');
     
@@ -80,7 +95,10 @@ describe('Homepage Data Loading Debug', () => {
           count: data.length,
           firstItem: data[0]?.name,
           hasPrice: !!data[0]?.price_diamonds
-        });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
         expect(data.length).toBeGreaterThan(0);
         expect(data[0]).toHaveProperty('name');
         expect(data[0]).toHaveProperty('price_diamonds');

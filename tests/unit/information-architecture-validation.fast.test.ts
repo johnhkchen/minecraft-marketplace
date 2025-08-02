@@ -7,6 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 describe('Information Architecture - Content Strategy Validation', () => {
   const getComponentContent = (filename: string): string => {
@@ -23,6 +24,8 @@ describe('Information Architecture - Content Strategy Validation', () => {
   };
 
   it('eliminates technical jargon from page titles (CS1)', () => {
+  const start = performance.now();
+  
     const indexContent = getPageContent('index.astro');
     
     // Page title should be user-centered
@@ -32,9 +35,14 @@ describe('Information Architecture - Content Strategy Validation', () => {
     expect(indexContent).not.toMatch(/nasdaq/i);
     expect(indexContent).not.toMatch(/port\s*\d+/i);
     expect(indexContent).not.toMatch(/blocks\s*\|\s*port/i);
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('uses user-centered language in main component (CS1)', () => {
+  const start = performance.now();
+  
     const marketplaceContent = getComponentContent('MinecraftMarketplace.svelte');
     
     // Should use clear, user-focused language
@@ -48,18 +56,28 @@ describe('Information Architecture - Content Strategy Validation', () => {
     expect(marketplaceContent).not.toMatch(/terminal/i);
     // PostgreSQL can appear in footer technical details section
     expect(marketplaceContent).not.toMatch(/postgrest/i);
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('moves technical details to progressive disclosure (CS3)', () => {
+  const start = performance.now();
+  
     const marketplaceContent = getComponentContent('MinecraftMarketplace.svelte');
     
     // Technical details should be behind disclosure (check for progressive disclosure pattern)
     expect(marketplaceContent).toMatch(/<details[\s\S]*?<\/details>/); // Regex to match details element with any content
     expect(marketplaceContent).toContain('Technical Information'); // Check for technical info
     expect(marketplaceContent).toContain('tech-details'); // Check for CSS class
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('prioritizes user actions over system information (IA1)', () => {
+  const start = performance.now();
+  
     const marketplaceContent = getComponentContent('MinecraftMarketplace.svelte');
     
     // Primary actions should appear before system details
@@ -76,9 +94,14 @@ describe('Information Architecture - Content Strategy Validation', () => {
     // This is acceptable as the technical details are hidden behind <details>
     expect(techDetailsIndex).toBeLessThan(browseIndex);
     expect(techDetailsIndex).toBeLessThan(sellIndex);
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('uses consistent user-friendly terminology (CS4)', () => {
+  const start = performance.now();
+  
     const marketplaceContent = getComponentContent('MinecraftMarketplace.svelte');
     
     // Should consistently use "items" not "listings"
@@ -89,9 +112,14 @@ describe('Information Architecture - Content Strategy Validation', () => {
     
     // Should be consistent with diamond terminology
     expect(marketplaceContent).toMatch(/all prices in diamonds/i);
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('implements clear information hierarchy in browser component (IA4)', () => {
+  const start = performance.now();
+  
     const browserContent = getComponentContent('MarketplaceBrowser.svelte');
     
     // Should have task-oriented heading
@@ -105,9 +133,14 @@ describe('Information Architecture - Content Strategy Validation', () => {
     // Advanced filters should be behind disclosure
     expect(browserContent).toContain('More filters');
     expect(browserContent).toContain('advanced-filters');
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('uses plain language for search guidance (CS1)', () => {
+  const start = performance.now();
+  
     const browserContent = getComponentContent('MarketplaceBrowser.svelte');
     
     // Search placeholder should use examples
@@ -118,9 +151,14 @@ describe('Information Architecture - Content Strategy Validation', () => {
     expect(browserContent).toContain('Max price:');
     expect(browserContent).toContain('From seller:');
     expect(browserContent).toContain('in diamond blocks');
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('implements HATEOAS principles in component structure (H1-H5)', () => {
+  const start = performance.now();
+  
     const browserContent = getComponentContent('MarketplaceBrowser.svelte');
     
     // Should use semantic HTML
@@ -135,11 +173,16 @@ describe('Information Architecture - Content Strategy Validation', () => {
     // Should provide clear state communication
     expect(browserContent).toContain('Available to buy');
     expect(browserContent).toContain('Someone wants this');
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 });
 
 describe('Information Architecture - Navigation Structure', () => {
   it('creates proper navigation component with HATEOAS principles', () => {
+  const start = performance.now();
+  
     const navPath = path.join(process.cwd(), 'workspaces/frontend/src/components/Navigation.svelte');
     
     // Navigation component should exist
@@ -157,11 +200,16 @@ describe('Information Architecture - Navigation Structure', () => {
     expect(navContent).toContain('Browse Items');
     expect(navContent).toContain('Sell Items');
     expect(navContent).toContain('Browse Shops');
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 });
 
 describe('Information Architecture - File Structure Validation', () => {
   it('creates comprehensive documentation', () => {
+  const start = performance.now();
+  
     const guidePath = path.join(process.cwd(), 'docs/INFORMATION_ARCHITECTURE_GUIDE.md');
     expect(fs.existsSync(guidePath)).toBe(true);
     
@@ -174,9 +222,14 @@ describe('Information Architecture - File Structure Validation', () => {
     expect(guideContent).toContain('Visual Hierarchy');
     expect(guideContent).toContain('Component Patterns');
     expect(guideContent).toContain('Success Metrics');
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('creates proper test files for validation', () => {
+  const start = performance.now();
+  
     const testPaths = [
       'tests/unit/information-architecture-validation.fast.test.ts',
       'tests/unit/hateoas-compliance.fast.test.ts',
@@ -186,7 +239,10 @@ describe('Information Architecture - File Structure Validation', () => {
     testPaths.forEach(testPath => {
       const fullPath = path.join(process.cwd(), testPath);
       expect(fs.existsSync(fullPath)).toBe(true);
-    });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
   });
 });
 
@@ -200,6 +256,8 @@ describe('Performance and Quality Metrics', () => {
   };
 
   it('maintains fast test execution requirements', () => {
+  const start = performance.now();
+  
     // This test itself should complete quickly (< 10ms)
     const startTime = performance.now();
     
@@ -216,9 +274,14 @@ describe('Performance and Quality Metrics', () => {
     
     // Should complete very quickly
     expect(executionTime).toBeLessThan(10);
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('validates information hierarchy implementation', () => {
+  const start = performance.now();
+  
     const browserContent = getComponentContent('MarketplaceBrowser.svelte');
     
     // Primary search should appear before advanced filters
@@ -228,9 +291,14 @@ describe('Performance and Quality Metrics', () => {
     expect(primarySearchIndex).toBeGreaterThan(-1);
     expect(advancedFiltersIndex).toBeGreaterThan(-1);
     expect(primarySearchIndex).toBeLessThan(advancedFiltersIndex);
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('ensures consistent terminology usage', () => {
+  const start = performance.now();
+  
     const marketplaceContent = getComponentContent('MinecraftMarketplace.svelte');
     const browserContent = getComponentContent('MarketplaceBrowser.svelte');
     
@@ -245,5 +313,8 @@ describe('Performance and Quality Metrics', () => {
     expect(itemsCount).toBeGreaterThan(10); // At least 10 uses of "items"
     expect(combinedContent).toMatch(/items for sale/i);
     expect(combinedContent).toMatch(/browse items/i);
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 });

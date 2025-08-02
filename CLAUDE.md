@@ -178,6 +178,8 @@ const result = await itemRepository.create(item); // Validates Epic 4 shop owner
 3. **MINIMAL GREEN**: Write smallest code to pass test
 4. **REFACTOR IN GREEN**: Only improve when all tests pass
 5. **NO MANUAL VERIFICATION**: All validation automated
+6. **⚠️ MSW FIRST**: Always use MSW mocking before considering infrastructure
+7. **⚠️ PERFORMANCE VALIDATION**: All .fast.test.ts files must include `expectFastExecution()`
 
 ### Dependency Injection for Fast Tests
 
@@ -231,6 +233,62 @@ expectFastExecution(timeMs, 5); // Fails if >5ms
 - **Fast Tests (70%+)**: MSW mocked, DI isolated, <10ms per test
 - **Unit Tests (20%)**: Single service, mocked dependencies, <1.5s per test  
 - **Integration Tests (10%)**: Multi-service, real dependencies, <5s per test
+
+### ⚠️ CRITICAL: Performance Culprits Identified
+
+**Based on comprehensive speed analysis, these techniques cause catastrophic slowdown:**
+
+#### **AVOID - Extreme Performance Impact (1000x+ slower)**
+- **hardcoded-data**: 18,753x slower than baseline (1.8M ms avg)
+- **docker**: 12,433x slower than baseline (1.2M ms avg) 
+- **container-setup**: 8,499x slower than baseline (849K ms avg)
+- **testcontainers**: 6,773x slower than baseline (677K ms avg)
+- **database-integration**: 4,098x slower than baseline (409K ms avg)
+
+#### **PREFERRED - Fast Performance (5x baseline)**
+- **MSW-mocking**: Only 5.8x slower than baseline (577ms avg)
+- **performance-validation**: 19.5x slower (acceptable for measurement)
+
+#### **Key Finding: 198 Orphaned Tests**
+**MAJOR ISSUE**: 198 tests cannot run without Docker/infrastructure setup
+- These tests are effectively orphaned in development environments
+- Converting to MSW mocking provides 1000x+ performance improvement
+- Infrastructure tests should only exist in `tests/integration/` with proper containers
+
+### 🚀 Proven Fast Testing Patterns (FROM ANALYSIS)
+
+#### **Technique Selection Guide**
+```typescript
+// ✅ FASTEST - Use MSW mocking (5.8x baseline)
+import { setupServer } from 'msw/node';
+const server = setupServer(...handlers);
+
+// ✅ FAST - Performance validation (19.5x baseline) 
+const { result, timeMs } = await measure(async () => {
+  return await service.process(data);
+});
+expectFastExecution(timeMs, 10);
+
+// ❌ AVOID - Docker/testcontainers (6,773x+ slower)
+// Don't: beforeAll(async () => { container = await new PostgreSqlContainer().start(); });
+
+// ❌ AVOID - Database integration without mocks (4,098x slower)  
+// Don't: const result = await database.query('SELECT * FROM items');
+
+// ❌ AVOID - Hardcoded test data (18,753x slower)
+// Don't: const userId = 'user_123'; // Use factories instead
+```
+
+#### **File Performance Targets (MEASURED)**
+- **report-submission-flow-improvement.fast.test.ts**: Currently 167ms per test → Target <10ms
+- **item-creation-form-improvement.fast.test.ts**: Currently 68ms per test → Target <10ms  
+- **Overall test execution**: Currently 5,070ms → Target <1,500ms
+
+#### **Conversion Priority (High Impact)**
+1. **Convert 198 orphaned tests** from infrastructure to MSW mocking
+2. **Add performance validation** to all 17 .fast.test.ts files missing it
+3. **Replace hardcoded data** in 5 files with configurable factories
+4. **Profile slow .fast.test.ts files** with Node.js --cpu-prof
 
 ### Testcontainers for Infrastructure Tests
 
@@ -607,18 +665,18 @@ npm run test:e2e               # MUST complete in <30s total
 npm run test:performance       # MUST validate <2s search, <500ms filter
 ```
 
-**Speed Analysis Features** (`npm run test:speed`)
-- **Comprehensive Coverage**: Analyzes 293 tests across all categories (Fast Tests: 243, Collaboration Tests: 50)
-- **Multi-Category Analysis**: Fast, Unit, Integration, Collaboration, Performance, Security, API, Database, E2E tests
+**Speed Analysis Features** (`npm run test:speed`) - **ENHANCED WITH TECHNIQUE CULPRIT ANALYSIS**
+- **🎯 Technique Performance Ranking**: Identifies which testing techniques cause 1000x+ slowdown
+- **📊 Bottom Quintile Analysis**: Pinpoints slowest 20% of tests with specific performance measurements
+- **🏆 Performance Culprit Identification**: Ranks techniques from catastrophic (18,753x slower) to fast (5.8x slower)
+- **🚨 Orphaned Test Detection**: Identifies 198 tests that cannot run without infrastructure
+- **⚡ File-Level Performance Mapping**: Maps specific files to techniques causing slowness
+- **💡 Technique-Specific Recommendations**: MSW conversion, performance validation, configurable factories
+- **📈 Real Performance Data**: All numbers based on actual measurements, not estimates
+- **🔧 Conversion Priority Matrix**: High-impact optimizations ranked by performance gain
 - **Smart Infrastructure Handling**: Skips infrastructure-dependent tests to avoid false performance issues
-- **Slow Test Detection**: Identifies tests exceeding their speed category limits with specific timing targets
-- **Misclassification Detection**: Finds tests in wrong speed categories (unit tests using infrastructure, etc.)
-- **Hardcoded Data Detection**: Flags tests with temporal coupling (user_123, item_456) that lack configurable factories
 - **Performance Validation**: Ensures fast tests include performance measurements (expectFastExecution)
-- **Partial Failure Handling**: Extracts useful metrics even from test suites with some failures
-- **Performance Recommendations**: Suggests specific improvements for each slow test
-- **Automatic Fixes**: `npm run test:fix-slow` applies common speed optimizations
-- **Coverage Analysis**: Reports percentage of fast vs slow tests with actionable insights
+- **Automatic Fixes**: `npm run test:fix-slow` applies fast testing patterns based on analysis
 
 **Architecture & Business Logic Gates**
 ```bash

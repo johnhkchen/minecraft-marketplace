@@ -9,6 +9,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setupFastTests } from '../utils/fast-test-setup.js';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 // Setup MSW mocking
 setupFastTests();
@@ -20,8 +21,14 @@ describe('Homepage API Root Cause Detection', () => {
   });
 
   it('should detect when API calls are failing in server-side context', async () => {
+  const start = performance.now();
+  
     // Import the function we're testing
-    const { loadHomepageData } = await import('../../workspaces/frontend/src/lib/homepage-data.js');
+    const { loadHomepageData
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+} = await import('../../workspaces/frontend/src/lib/homepage-data.js');
     
     // Mock console.error to catch API failures
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -74,6 +81,8 @@ describe('Homepage API Root Cause Detection', () => {
   });
 
   it('should detect URL construction issues', async () => {
+  const start = performance.now();
+  
     // Test that our URL construction works in different environments
     
     // Simulate different environment conditions
@@ -82,7 +91,10 @@ describe('Homepage API Root Cause Detection', () => {
         name: 'Test Environment', 
         nodeEnv: 'test',
         expectedBaseUrl: 'http://localhost:3000'
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       { 
         name: 'Production Environment', 
         nodeEnv: 'production',
@@ -128,6 +140,8 @@ describe('Homepage API Root Cause Detection', () => {
   });
 
   it('should detect MSW handler coverage for all API endpoints', async () => {
+  const start = performance.now();
+  
     // Test that MSW handlers exist for all the endpoints our function uses
     const requiredEndpoints = [
       '/api/data/public_items?limit=20&offset=0&order=price_diamonds.desc',
@@ -140,7 +154,11 @@ describe('Homepage API Root Cause Detection', () => {
     console.log('🎯 Testing MSW handler coverage...');
     
     for (const endpoint of requiredEndpoints) {
-      console.log(`  📡 Testing: ${endpoint}`);
+      console.log(`  📡 Testing: ${endpoint
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+}`);
       
       try {
         const response = await fetch(`http://localhost:3000${endpoint}`);
@@ -167,8 +185,14 @@ describe('Homepage API Root Cause Detection', () => {
   });
 
   it('should detect when fallback data is being used instead of API data', async () => {
+  const start = performance.now();
+  
     // Test that we can distinguish between API data and fallback data
-    const { loadHomepageData } = await import('../../workspaces/frontend/src/lib/homepage-data.js');
+    const { loadHomepageData
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+} = await import('../../workspaces/frontend/src/lib/homepage-data.js');
     
     const result = await loadHomepageData();
     

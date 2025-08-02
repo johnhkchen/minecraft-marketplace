@@ -5,6 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { setupFastTests } from '../utils/fast-test-setup.js';
 import { URLConstructionService } from '../../shared/services/url-construction-service.js';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 setupFastTests();
 
@@ -23,11 +24,17 @@ describe('URL Service Debug', () => {
   });
 
   it('should show exactly what URLs are generated in each context', () => {
+  const start = performance.now();
+  
     console.log('🔍 URL GENERATION DEBUG');
     console.log('======================\n');
     
     const testCases = [
-      { env: 'test', hasWindow: true, label: 'Test Browser' },
+      { env: 'test', hasWindow: true, label: 'Test Browser'
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       { env: 'test', hasWindow: false, label: 'Test Server' },
       { env: 'production', hasWindow: true, label: 'Prod Browser' },
       { env: 'production', hasWindow: false, label: 'Prod Server' },

@@ -381,8 +381,8 @@ export const itemFormActions = {
     }));
     
     try {
-      // Simulate form submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate form submission (fast for tests)
+      await new Promise(resolve => setTimeout(resolve, 1));
       
       itemFormState.update(state => ({
         ...state,

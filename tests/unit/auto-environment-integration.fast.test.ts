@@ -7,9 +7,12 @@
 
 import { describe, it, expect } from 'vitest';
 import '../utils/auto-environment-guard.js'; // ← This line automatically activates protection
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 describe('Auto Environment Integration', () => {
   it('should demonstrate zero-config environment protection', () => {
+  const start = performance.now();
+  
     console.log('🎯 ZERO-CONFIG ENVIRONMENT PROTECTION');
     console.log('====================================\n');
     
@@ -25,9 +28,14 @@ describe('Auto Environment Integration', () => {
     console.log('');
     
     expect(true).toBe(true);
-  });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
 
   it('should show how to integrate into existing test infrastructure', () => {
+  const start = performance.now();
+  
     console.log('🔧 INTEGRATION STRATEGIES');
     console.log('=========================\n');
     
@@ -37,7 +45,10 @@ describe('Auto Environment Integration', () => {
         file: 'tests/setup.ts',
         code: 'import "./utils/auto-environment-guard.js";',  
         description: 'Add one line to global test setup - protects all tests'
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         method: 'Fast Test Configuration',
         file: 'vitest.fast.config.ts',
@@ -73,6 +84,8 @@ describe('Auto Environment Integration', () => {
   });
 
   it('should validate the guard catches real environment issues automatically', () => {
+  const start = performance.now();
+  
     console.log('🧪 AUTOMATIC ISSUE DETECTION VALIDATION');
     console.log('======================================\n');
     
@@ -82,7 +95,10 @@ describe('Auto Environment Integration', () => {
         name: 'Homepage URL Construction',
         pattern: (env: string) => env === 'test' ? 'http://localhost:3000' : '',
         issue: 'Only test environment gets absolute URLs'
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         name: 'API Base Configuration', 
         pattern: (env: string) => env === 'development' ? 'http://localhost:3000' : process.env.API_URL || '',
@@ -119,6 +135,8 @@ describe('Auto Environment Integration', () => {
   });
 
   it('should provide guidance for when warnings are detected', () => {
+  const start = performance.now();
+  
     console.log('📋 WHEN ENVIRONMENT WARNINGS ARE DETECTED');
     console.log('==========================================\n');
     
@@ -128,7 +146,10 @@ describe('Auto Environment Integration', () => {
         action: 'Identify the Pattern',
         description: 'Look at the warning message to understand which pattern failed',
         example: '"URL Construction failed in Prod+Server: Cannot construct URL: /api/test"'
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         step: 2,
         action: 'Locate the Code',

@@ -7,6 +7,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setupFastTests } from '../utils/fast-test-setup.js';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 setupFastTests();
 
@@ -16,6 +17,8 @@ describe('API Failure Pattern Detection', () => {
   });
 
   it('should detect when functions return synthetic data patterns', async () => {
+    const start = performance.now();
+    
     const { loadHomepageData } = await import('../../workspaces/frontend/src/lib/homepage-data.js');
     
     const result = await loadHomepageData();
@@ -57,6 +60,9 @@ describe('API Failure Pattern Detection', () => {
     }
     
     console.log('✅ Data patterns indicate real marketplace content');
+    
+    const timeMs = performance.now() - start;
+    expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
   });
 
   it('should detect fallback data structure patterns', async () => {
@@ -96,7 +102,13 @@ describe('API Failure Pattern Detection', () => {
   });
 
   it('should detect unrealistic data that indicates test/mock data', async () => {
-    const { loadHomepageData } = await import('../../workspaces/frontend/src/lib/homepage-data.js');
+  const start = performance.now();
+  
+    const { loadHomepageData
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+} = await import('../../workspaces/frontend/src/lib/homepage-data.js');
     
     const result = await loadHomepageData();
     
@@ -152,6 +164,8 @@ describe('API Failure Pattern Detection', () => {
   });
 
   it('should detect API call failure signatures in console output', async () => {
+  const start = performance.now();
+  
     // Mock console to capture error patterns
     const consoleLogs = [];
     const consoleErrors = [];
@@ -162,7 +176,10 @@ describe('API Failure Pattern Detection', () => {
     console.log = (...args) => {
       consoleLogs.push(args.join(' '));
       originalConsoleLog(...args);
-    };
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+};
     
     console.error = (...args) => {
       consoleErrors.push(args.join(' '));
@@ -212,7 +229,13 @@ describe('API Failure Pattern Detection', () => {
   });
 
   it('should validate data freshness patterns', async () => {
-    const { loadHomepageData } = await import('../../workspaces/frontend/src/lib/homepage-data.js');
+  const start = performance.now();
+  
+    const { loadHomepageData
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+} = await import('../../workspaces/frontend/src/lib/homepage-data.js');
     
     const result = await loadHomepageData();
     

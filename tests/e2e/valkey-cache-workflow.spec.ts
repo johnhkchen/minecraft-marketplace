@@ -37,7 +37,7 @@ test.describe('Valkey Cache E2E Workflow', () => {
     await page.goto('/');
     
     // Wait for page to load
-    await page.waitForSelector('[data-testid="marketplace-items"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="marketplace-items"]');
 
     // Measure first load time (cache miss)
     const firstLoadStart = Date.now();
@@ -53,7 +53,7 @@ test.describe('Valkey Cache E2E Workflow', () => {
     await page.click('[data-testid="apply-filters"]');
     
     // Wait for filtered results
-    await page.waitForSelector('[data-testid="filtered-results"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid="filtered-results"]');
 
     // Check if results are showing
     const itemCount = await page.locator('[data-testid="item-card"]').count();
@@ -110,7 +110,7 @@ test.describe('Valkey Cache E2E Workflow', () => {
     await page.goto('/');
     
     // Even without cache, the page should load
-    await page.waitForSelector('[data-testid="marketplace-items"]', { timeout: 15000 });
+    await page.waitForSelector('[data-testid="marketplace-items"]');
     
     // Basic functionality should work
     const itemCount = await page.locator('[data-testid="item-card"]').count();
@@ -121,7 +121,7 @@ test.describe('Valkey Cache E2E Workflow', () => {
     await page.click('[data-testid="search-button"]');
     
     // Should get search results (might be slower without cache)
-    await page.waitForSelector('[data-testid="search-results"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="search-results"]');
     
     console.log('✅ Application works without cache dependency');
   });
@@ -153,7 +153,7 @@ test.describe('Valkey Cache E2E Workflow', () => {
       await page.click('[data-testid="apply-filters"]');
       
       // Wait for results
-      await page.waitForSelector('[data-testid="filtered-results"]', { timeout: 5000 });
+      await page.waitForSelector('[data-testid="filtered-results"]');
       
       const itemCount = await page.locator('[data-testid="item-card"]').count();
       results.push({ filters, itemCount });

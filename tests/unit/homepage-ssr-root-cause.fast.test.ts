@@ -7,6 +7,7 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { setupFastTests } from '../utils/fast-test-setup.js';
+import { expectFastExecution } from '../utils/fast-test-setup.js';
 
 setupFastTests();
 
@@ -26,8 +27,14 @@ describe('Homepage SSR Root Cause Analysis', () => {
   });
 
   it('should expose URL construction differences between test and production environments', async () => {
+  const start = performance.now();
+  
     const environments = [
-      { name: 'test', nodeEnv: 'test' },
+      { name: 'test', nodeEnv: 'test'
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       { name: 'production', nodeEnv: 'production' },
       { name: 'development', nodeEnv: 'development' }
     ];
@@ -76,12 +83,17 @@ describe('Homepage SSR Root Cause Analysis', () => {
   });
 
   it('should demonstrate fetch behavior differences in server vs browser contexts', async () => {
+  const start = performance.now();
+  
     const testScenarios = [
       {
         name: 'Server-side (no window)',
         setup: () => {
           delete (global as any).window;
-        },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
         url: '/api/data/public_items?limit=1',
         expectsToFail: true
       },
@@ -147,8 +159,14 @@ describe('Homepage SSR Root Cause Analysis', () => {
   });
 
   it('should expose the environment variable detection logic flaw', async () => {
+  const start = performance.now();
+  
     const envTestCases = [
-      { nodeEnv: 'test', description: 'Test environment' },
+      { nodeEnv: 'test', description: 'Test environment'
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       { nodeEnv: 'production', description: 'Production environment' },
       { nodeEnv: 'development', description: 'Development environment' },
       { nodeEnv: undefined, description: 'Undefined NODE_ENV' },
@@ -192,12 +210,17 @@ describe('Homepage SSR Root Cause Analysis', () => {
   });
 
   it('should demonstrate MSW interception differences with URL types', async () => {
+  const start = performance.now();
+  
     const urlTypes = [
       {
         name: 'Absolute URL',
         url: 'http://localhost:3000/api/data/public_items?limit=1',
         shouldBeIntercepted: true
-      },
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+},
       {
         name: 'Relative URL',
         url: '/api/data/public_items?limit=1',
@@ -250,6 +273,8 @@ describe('Homepage SSR Root Cause Analysis', () => {
   });
 
   it('should expose the complete failure chain from environment to fallback data', async () => {
+  const start = performance.now();
+  
     console.log('🔗 Complete Failure Chain Analysis:');
     
     // Simulate production environment
@@ -267,7 +292,10 @@ describe('Homepage SSR Root Cause Analysis', () => {
       description: 'Environment Detection',
       result: `NODE_ENV=production → relative URLs`,
       issue: usesRelativeUrl ? 'Uses relative URLs' : 'OK'
-    });
+  
+  const timeMs = performance.now() - start;
+  expectFastExecution(timeMs, 10); // Fast test should complete in <10ms
+});
     
     // Step 2: URL construction
     const testUrl = `${baseUrl}/api/data/public_items?limit=3`;
